@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FX Pilot: currency paper-trading bot</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5f8;--panel:#fff;--ink:#17212b;--mute:#738092;--line:#e5e9ef;--buy:#12805c;--sell:#cf514c;--acc:#425fe3;--nav:#111a27}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 'Instrument Sans',system-ui,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:13px 22px;background:var(--nav);color:#fff;border-bottom:1px solid #263344}
+h1{font-size:17px;letter-spacing:-.03em;margin:0 12px 0 0}
+input,button,select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+button{cursor:pointer;font-weight:600;transition:filter .15s}button:hover{filter:brightness(.96)}button.go{background:var(--acc);border-color:var(--acc);color:#fff}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;padding:20px 22px;max-width:1600px;margin:auto}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;box-shadow:0 2px 8px #192a3a08}
+h2{font-size:14px;letter-spacing:-.01em;margin:0 0 12px}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.chart-head h2{margin:0}
+#chart{height:390px;width:100%;position:relative}
+#chart canvas{display:block;width:100%;height:100%}
+#tvChart{height:470px;width:100%;min-width:0;position:relative;overflow:hidden;border-radius:6px}
+#tvChart .tradingview-widget-container__widget,#tvChart iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.chart-legend{display:flex;gap:14px;align-items:center;padding:4px 0 0}
+.legend-item{font-size:11px;color:var(--mute)}.swatch{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stats div{background:#f6f8fa;border-radius:7px;padding:10px}.stats b{display:block;font-size:16px;letter-spacing:-.025em;margin-top:2px}
+.stats span,.mute{color:var(--mute);font-size:12px}
+label{display:flex;justify-content:space-between;align-items:center;margin:9px 0;gap:8px}label input,label select{width:115px}
+.news{list-style:none;margin:0;padding:0}.news li{padding:9px 0;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:space-between}
+.up{color:var(--buy)}.dn{color:var(--sell)}
+.wide{grid-column:1/-1;overflow-x:auto}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 8px;border-top:1px solid var(--line);white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}
+.side{display:flex;flex-direction:column;gap:14px}
+.badge{font-size:11px;font-weight:700;border-radius:20px;padding:4px 9px;white-space:nowrap}
+.demo{color:#ffdc8b;background:#3a321c}.live{color:#cee5fa;background:#26394d}
+.signal-box{padding:10px;border-radius:7px;background:#f6f8fa;margin-top:10px}.signal-box b{font-size:15px}
+.signal-box p{margin:4px 0 0;color:var(--mute);font-size:12px}
+.full{width:100%;margin-top:8px}
+.risk-note{padding:9px;background:#fff8e9;border-radius:6px;color:#83601f;font-size:11px;margin:10px 0 0}
+.empty{padding:20px 8px;text-align:center;color:var(--mute)}
+.watch-list{display:grid;gap:8px}
+.watch-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px;background:#f6f8fa;border-radius:7px}
+.watch-item button{padding:4px 8px}
+.watch-alert{border-left:3px solid var(--acc);padding:8px 10px;background:#f6f8fa;border-radius:5px;margin-top:8px}
+.watch-alert.buy{border-color:var(--buy)}.watch-alert.sell{border-color:var(--sell)}
+.watch-alert b{display:block}.watch-alert span{font-size:11px;color:var(--mute)}
+.subtle{font-size:11px;color:var(--mute);margin:5px 0 10px}
+details{border-top:1px solid var(--line);margin-top:10px;padding-top:9px}
+summary{cursor:pointer;font-size:12px;font-weight:600}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:14px}.side{display:grid;grid-template-columns:1fr 1fr}.side section:last-child{grid-column:1/-1}}
+@media(max-width:580px){header{padding:12px}main{padding:10px;gap:10px}.side{display:flex}#chart{height:290px}#tvChart{height:390px}.chart-head{align-items:flex-start;flex-direction:column}.wide{padding:12px}}
+</style></head><body>
+<header>
+ <h1>FX Pilot</h1>
+ <label class="mute" style="margin:0;color:#c2ccd8">Pair
+  <select id="pair" aria-label="Currency pair"></select>
+ </label>
+ <label class="mute" style="margin:0;color:#c2ccd8">Timeframe
+  <select id="timeframe" aria-label="Chart timeframe"><option value="5m">5 minutes</option><option value="15m">15 minutes</option><option value="1h" selected>1 hour</option><option value="4h">4 hours</option><option value="1d">1 day</option></select>
+ </label>
+ <button id="run">Pause simulation</button>
+ <span class="badge live">LIVE CHART · TRADINGVIEW</span>
+ <span class="badge demo">SIGNALS · PAPER SIMULATION</span>
+ <span class="mute" style="color:#c2ccd8">Market data may be delayed · no broker connected</span>
+</header>
+<main>
+ <section><div class="chart-head"><h2 id="liveTitle">Live market chart · EUR/USD</h2><span class="mute" id="liveFrameLabel">TradingView · 1-hour candles</span></div><div id="tvChart"></div>
+  <p class="mute">Live chart from TradingView. Quote availability and delays depend on its data providers. The paper signals below do not use this feed.</p></section>
+ <div class="side">
+  <section><h2>Paper account</h2><div class="stats" id="stats"></div><div class="signal-box" id="signal"></div></section>
+  <section><h2>Simple risk setting</h2>
+   <label>Risk style<select id="riskProfile" aria-label="Risk style"><option value="cautious">Cautious</option><option value="balanced" selected>Balanced</option><option value="higher">Higher risk</option><option value="custom">Custom</option></select></label>
+   <p id="riskSummary" class="subtle">Balanced: up to 1% risk per simulated trade, 3% daily loss limit.</p>
+   <details><summary>Advanced risk controls</summary>
+    <label>Risk per trade (%)<input id="risk" type="number" value="1" step="0.25" min="0.1"></label>
+    <label>Stop-loss (%)<input id="sl" type="number" value="0.4" step="0.1" min="0.05"></label>
+    <label>Take-profit (%)<input id="tp" type="number" value="0.8" step="0.1" min="0.05"></label>
+    <label>Daily loss limit (%)<input id="dd" type="number" value="3" step="0.5" min="0.5"></label>
+   </details>
+   <button id="rerun" class="full">Apply settings &amp; reset simulation</button>
+   <p class="risk-note">Risk styles only change the local paper simulation. They do not predict losses or send broker orders.</p></section>
+  <section><h2>Favorite pair alerts</h2>
+   <button id="favoriteToggle" class="full">☆ Add selected pair</button>
+   <p class="subtle">We’ll flag simulated signals here when you’re viewing a different pair.</p>
+   <div id="favoriteList" class="watch-list"></div><div id="favoriteAlerts" aria-live="polite"></div>
+  </section>
+  <section><h2>World news &amp; currency bias</h2><span class="badge live">SAMPLE HEADLINES</span><div id="bias" class="mute" style="margin-top:9px"></div><ul class="news" id="news"></ul></section>
+ </div>
+ <section><div class="chart-head"><h2 id="title">Strategy simulation preview</h2><span class="mute" id="price">Synthetic demo prices</span></div><div id="chart"><canvas id="plot" role="img" aria-label="Simulated candlestick chart with buy and sell signals"></canvas></div>
+  <div class="chart-legend"><span class="legend-item"><i class="swatch" style="background:#12805c"></i>Buy / bullish candle</span><span class="legend-item"><i class="swatch" style="background:#cf514c"></i>Sell / bearish candle</span><span class="legend-item"><i class="swatch" style="background:#425fe3"></i>Fast MA</span><span class="legend-item"><i class="swatch" style="background:#d98a1c"></i>Slow MA</span></div>
+  <p class="mute">Strategy markers use synthetic demo candles only. Demo candles advance about every 1.2 seconds; they are not live signals and are not overlaid on the TradingView chart.</p></section>
+ <section class="wide"><h2>Paper trade log</h2><table><thead><tr><th>Closed</th><th>Side</th><th>Entry</th><th>Exit</th><th>Profit / loss</th></tr></thead><tbody id="log"></tbody></table></section>
+</main>
+<script>
+const $=s=>document.querySelector(s);
+const PAIRS=['EUR/USD','GBP/USD','USD/JPY','USD/CHF','USD/CAD','AUD/USD','NZD/USD',
+ 'EUR/GBP','EUR/JPY','EUR/CHF','EUR/CAD','EUR/AUD','EUR/NZD','EUR/ZAR',
+ 'GBP/JPY','GBP/CHF','GBP/CAD','GBP/AUD','GBP/NZD',
+ 'AUD/JPY','AUD/NZD','AUD/CAD','AUD/CHF','NZD/JPY','NZD/CAD','NZD/CHF',
+ 'CAD/JPY','CHF/JPY','USD/ZAR','USD/MXN','USD/TRY','USD/SGD','USD/HKD','USD/CNH'];
+const BASE={'EUR/USD':1.085,'GBP/USD':1.27,'USD/JPY':149,'USD/ZAR':18.2,'AUD/USD':.66,'USD/CAD':1.36,'USD/CHF':.88,'NZD/USD':.6,'EUR/GBP':.855,'EUR/JPY':162,'GBP/JPY':189,'EUR/ZAR':19.7};
+const USD_VALUE={USD:1,EUR:1.085,GBP:1.27,JPY:1/149,CHF:.88,CAD:1/1.36,AUD:.66,NZD:.6,ZAR:1/18.2,MXN:1/17.5,TRY:1/34,SGD:1/1.35,HKD:1/7.8,CNH:1/7.1};
+const FRAMES={'5m':{seconds:300,tv:'5',label:'5-minute'},'15m':{seconds:900,tv:'15',label:'15-minute'},'1h':{seconds:3600,tv:'60',label:'1-hour'},'4h':{seconds:14400,tv:'240',label:'4-hour'},'1d':{seconds:86400,tv:'D',label:'daily'}};
+$('#pair').innerHTML=PAIRS.map(p=>`<option value="${p}">${p.replace('/',' / ')}</option>`).join('');
+$('#pair').value=localStorage.getItem('fxpilot.pair')||'EUR/USD';
+let favorites=JSON.parse(localStorage.getItem('fxpilot.favorites')||'[]').filter(p=>PAIRS.includes(p));
+let favoriteFeeds={},favoriteAlerts=[];
+
+/* ---------- ADAPTER 1: market data ----------
+   Demo: seeded random walk, one new hourly candle per tick.
+   Live: replace feed.next() with candles from your backend (OANDA, Twelve Data, etc.). */
+const rng=s=>()=>(s=(s*16807)%2147483647)/2147483647;
+const seedOf=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))%2147483647;return h};
+function makeFeed(pair,seconds=FRAMES[$('#timeframe').value].seconds){
+ const r=rng(seedOf(pair)),[base,quote]=pair.split('/');let p=BASE[pair]||(USD_VALUE[base]&&USD_VALUE[quote]?USD_VALUE[base]/USD_VALUE[quote]:.8+r()*1.5),t=Math.floor(Date.now()/1000/seconds)*seconds-300*seconds,i=0;
+ return{p0:p,next(){const o=p,v=o*.0018,c=o+(r()-.5)*2*v+Math.sin(i++/22)*v*.4;
+  const h=Math.max(o,c)+r()*v*.5,l=Math.min(o,c)-r()*v*.5;p=c;t+=seconds;return{time:t,open:o,high:h,low:l,close:c}}}}
+
+/* ---------- ADAPTER 2: world news ----------
+   Demo: canned headlines with sentiment scores (-1 bad for the currency, +1 good).
+   Live: your backend fetches NewsAPI / GDELT / an economic calendar, asks an LLM to score each
+   headline per currency, and returns the same shape: [{title, ccy, score}] */
+const NEWS={USD:[['Fed signals rates stay higher for longer',.6],['US jobs report misses forecasts',-.4]],
+ EUR:[['ECB hints at a rate cut as inflation cools',-.5],['Eurozone business activity beats expectations',.3]],
+ GBP:[['UK wage growth stays firm, Bank of England cautious',.4]],JPY:[['Bank of Japan debates ending ultra-loose policy',.6]],
+ ZAR:[['SARB holds repo rate, flags inflation risk',.3],['Power supply improves, lifting growth outlook',.4]],
+ AUD:[['China demand data weighs on commodity exports',-.4]],CAD:[['Oil prices climb, supporting Canadian exports',.4]],
+ CHF:[['Safe-haven flows lift the franc',.3]],NZD:[['New Zealand dairy prices slip',-.3]]};
+function getNews(pair){
+ const [b,q]=pair.split('/'),items=[];
+ for(const c of [b,q])(NEWS[c]||[]).forEach(([title,score])=>items.push({title,ccy:c,score}));
+ const avg=c=>{const a=(NEWS[c]||[]).map(x=>x[1]);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0};
+ return{items,bias:Math.max(-1,Math.min(1,avg(b)-avg(q)))}; // >0 favours buying the pair
+}
+
+/* ---------- indicators ---------- */
+const avg=(a,n)=>a.length<n?null:a.slice(-n).reduce((x,y)=>x+y,0)/n;
+function rsi(a,n=14){if(a.length<n+1)return 50;let g=0,l=0;for(let i=a.length-n;i<a.length;i++){const d=a[i]-a[i-1];d>0?g+=d:l-=d}return l===0?100:100-100/(1+g/l)}
+
+/* ---------- bot engine (also used as the backtest over history) ---------- */
+let S,feed,timer,pair,dp=5;
+const cfg=()=>({risk:+$('#risk').value/100,sl:+$('#sl').value/100,tp:+$('#tp').value/100,dd:+$('#dd').value/100,fast:10,slow:30});
+const fmt=x=>x.toFixed(dp);
+function calculateSignal(closes,bias){
+ if(closes.length<31)return'HOLD';
+ const fast=avg(closes,10),slow=avg(closes,30),previous=closes.slice(0,-1),previousFast=avg(previous,10),previousSlow=avg(previous,30),momentum=rsi(closes);
+ if(previousFast<=previousSlow&&fast>slow&&momentum<70&&bias>-.3)return'BUY';
+ if(previousFast>=previousSlow&&fast<slow&&momentum>30&&bias<.3)return'SELL';
+ return'HOLD';
+}
+function validSettings(){
+ const ranges=[['risk',.1,5],['sl',.05,10],['tp',.05,20],['dd',.5,20]];
+ for(const [id,min,max] of ranges){const input=$('#'+id),value=Number(input.value);
+  if(!Number.isFinite(value)||value<min||value>max){input.focus();alert(`${input.previousSibling.textContent.trim()} must be between ${min}% and ${max}%.`);return false}}
+ return true;
+}
+function step(c){
+ const k=cfg(),prev=S.cl.slice();S.cl.push(c.close);S.cs.push(c);
+ const f=avg(S.cl,k.fast),s=avg(S.cl,k.slow),pf=avg(prev,k.fast),ps=avg(prev,k.slow);
+ if(f)S.fl.push({time:c.time,value:f});if(s)S.sl.push({time:c.time,value:s});
+ const sig=calculateSignal(S.cl,S.bias);
+ S.sig=sig;S.last=c.close;S.confidence=sig==='HOLD'?50:Math.min(90,Math.round(54+Math.min(18,Math.abs((f-s)/s)*12000)+Math.min(10,Math.abs(S.bias)*10)));
+ const day=Math.floor(c.time/86400),p=S.pos;
+ if(S.halt!==null&&S.halt!==day)S.halt=null;
+ if(p){let ex=null;
+  if(p.dir>0){if(c.low<=p.sl)ex=p.sl;else if(c.high>=p.tp)ex=p.tp}
+  else{if(c.high>=p.sl)ex=p.sl;else if(c.low<=p.tp)ex=p.tp}
+  if(ex==null&&sig!=='HOLD'&&(sig==='BUY')!==(p.dir>0))ex=c.close;
+  if(ex!=null){const pnl=(ex-p.entry)*p.dir*p.units;S.bal+=pnl;S.day[day]=(S.day[day]||0)+pnl;
+   S.trades.push({t:c.time,dir:p.dir,entry:p.entry,exit:ex,pnl});S.pos=null;
+   S.mk.push({time:c.time,position:p.dir>0?'aboveBar':'belowBar',color:'#6b7787',shape:'circle',text:(pnl>=0?'+':'')+pnl.toFixed(0)})}}
+ if((S.day[day]||0)<=-k.dd*S.start)S.halt=day;
+ if(S.halt===day){S.sig='PAUSED';return}
+ if(!S.pos&&sig!=='HOLD'){
+  const dir=sig==='BUY'?1:-1,e=c.close,dist=e*k.sl;
+  S.pos={dir,entry:e,units:S.bal*k.risk/dist,sl:e-dir*dist,tp:e+dir*e*k.tp};S.halt=null;
+  S.mk.push({time:c.time,position:dir>0?'belowBar':'aboveBar',color:dir>0?'#0f8a6a':'#c4423a',shape:dir>0?'arrowUp':'arrowDown',text:(dir>0?'BUY ':'SELL ')+fmt(e)})}
+}
+
+function drawChart(){
+ const canvas=$('#plot'),box=canvas.getBoundingClientRect(),w=box.width,h=box.height;
+ if(!S||w<10||h<10)return;
+ const dpr=window.devicePixelRatio||1;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);
+ const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ const left=10,right=64,top=12,bottom=27,plotW=w-left-right,plotH=h-top-bottom;
+ const data=S.cs.slice(-140);if(!data.length)return;
+ const indexByTime=new Map(data.map((c,i)=>[c.time,i]));
+ let lo=Math.min(...data.map(c=>c.low)),hi=Math.max(...data.map(c=>c.high));
+ for(const point of [...S.fl.slice(-data.length),...S.sl.slice(-data.length)]){lo=Math.min(lo,point.value);hi=Math.max(hi,point.value)}
+ const pad=(hi-lo)*.08||.001;lo-=pad;hi+=pad;
+ const x=i=>left+(i+.5)*plotW/data.length,y=v=>top+(hi-v)*plotH/(hi-lo);
+ ctx.font='11px "Instrument Sans",system-ui,sans-serif';ctx.textBaseline='middle';
+ for(let i=0;i<=4;i++){const py=top+plotH*i/4,val=hi-(hi-lo)*i/4;
+  ctx.strokeStyle='#edf0f4';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(w-right,py);ctx.stroke();
+  ctx.fillStyle='#738092';ctx.textAlign='left';ctx.fillText(val.toFixed(dp),w-right+8,py)}
+ const stepW=plotW/data.length,bodyW=Math.max(2,Math.min(9,stepW*.62));
+ data.forEach((c,i)=>{const cx=x(i),up=c.close>=c.open,color=up?'#12805c':'#cf514c';
+  ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,y(c.high));ctx.lineTo(cx,y(c.low));ctx.stroke();
+  ctx.fillStyle=color;const by=Math.min(y(c.open),y(c.close)),bh=Math.max(1,y(c.open)-y(c.close));ctx.fillRect(cx-bodyW/2,by,bodyW,bh)});
+ const line=(values,color)=>{ctx.strokeStyle=color;ctx.lineWidth=1.6;ctx.beginPath();let started=false;
+  for(const point of values){const i=indexByTime.get(point.time);if(i===undefined)continue;
+   if(!started){ctx.moveTo(x(i),y(point.value));started=true}else ctx.lineTo(x(i),y(point.value))}
+  if(started)ctx.stroke()};
+ line(S.fl,'#425fe3');line(S.sl,'#d98a1c');
+ for(const marker of S.mk){const i=indexByTime.get(marker.time);if(i===undefined)continue;const cx=x(i),cy=marker.shape==='circle'?y(data[i].close):(marker.position==='belowBar'?y(data[i].low)+9:y(data[i].high)-9);
+  if(marker.shape==='circle'){ctx.fillStyle='#738092';ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fill();continue}
+  ctx.fillStyle=marker.color;ctx.beginPath();
+  if(marker.position==='belowBar'){ctx.moveTo(cx,cy-6);ctx.lineTo(cx-5,cy+2);ctx.lineTo(cx+5,cy+2)}else{ctx.moveTo(cx,cy+6);ctx.lineTo(cx-5,cy-2);ctx.lineTo(cx+5,cy-2)}
+  ctx.closePath();ctx.fill();ctx.font='bold 10px "Instrument Sans",system-ui,sans-serif';ctx.textAlign='center';ctx.fillText(marker.text.split(' ')[0],cx,marker.position==='belowBar'?cy+12:cy-10)}
+ ctx.font='10px "Instrument Sans",system-ui,sans-serif';ctx.fillStyle='#738092';ctx.textAlign='center';
+ for(let i=0;i<5;i++){const at=Math.round((data.length-1)*i/4),date=new Date(data[at].time*1000);ctx.fillText(date.toLocaleDateString([],{month:'short',day:'numeric'})+' '+date.toLocaleTimeString([],{hour:'2-digit'}),x(at),h-10)}
+}
+
+function build(){
+ clearInterval(timer);pair=$('#pair').value.toUpperCase().trim();
+ if(!/^[A-Z]{3}\/[A-Z]{3}$/.test(pair)||pair.slice(0,3)===pair.slice(4)){alert('Enter a currency pair in XXX/YYY format, such as EUR/USD.');$('#pair').focus();return}
+ if(!validSettings())return;
+ $('#pair').value=pair;localStorage.setItem('fxpilot.pair',pair);
+ const frame=FRAMES[$('#timeframe').value];
+ localStorage.setItem('fxpilot.timeframe',$('#timeframe').value);
+ loadLiveChart(pair);
+ $('#liveTitle').textContent='Live market chart · '+pair;
+ $('#liveFrameLabel').textContent='TradingView · '+frame.label+' candles';
+ feed=makeFeed(pair,frame.seconds);dp=feed.p0>50?2:feed.p0>5?3:5;
+ const n=getNews(pair);
+ S={cl:[],cs:[],fl:[],sl:[],mk:[],trades:[],bal:1e4,start:1e4,pos:null,day:{},bias:n.bias,halt:null,sig:'HOLD',confidence:50,last:feed.p0};
+ for(let i=0;i<300;i++)step(feed.next());     // backtest over history
+ drawChart();
+ $('#title').textContent=pair+' · '+frame.label+' strategy simulation';
+ $('#bias').textContent=n.items.length?`News bias for ${pair}: ${n.bias>0?'+':''}${n.bias.toFixed(2)} (${n.bias>.15?'favours buying':n.bias<-.15?'favours selling':'neutral'})`:'No news loaded for this pair. Bias is neutral.';
+ $('#news').innerHTML=n.items.map(i=>`<li><span>${i.title}<br><span class="mute">${i.ccy}</span></span><b class="${i.score>=0?'up':'dn'}">${i.score>0?'+':''}${i.score}</b></li>`).join('');
+ syncFavoriteFeeds();render();
+ if($('#run').dataset.off!=='1')timer=setInterval(tick,1200);
+}
+function tick(){const c=feed.next();step(c);scanFavoritePairs();drawChart();render()}
+function loadLiveChart(pair){
+ const container=$('#tvChart');container.replaceChildren();
+ const widget=document.createElement('div');widget.className='tradingview-widget-container__widget';container.appendChild(widget);
+ const script=document.createElement('script');script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';script.async=true;
+ script.text=JSON.stringify({autosize:true,symbol:'FX:'+pair.replace('/',''),interval:FRAMES[$('#timeframe').value].tv,timezone:'Etc/UTC',theme:'light',style:'1',locale:'en',allow_symbol_change:false,hide_top_toolbar:true,hide_side_toolbar:true,calendar:false,support_host:'https://www.tradingview.com'});
+ container.appendChild(script);
+}
+function syncFavoriteFeeds(){
+ favoriteFeeds={};
+ for(const favorite of favorites){
+  const favoriteFeed=makeFeed(favorite,FRAMES[$('#timeframe').value].seconds),news=getNews(favorite),closes=[];
+  for(let i=0;i<60;i++)closes.push(favoriteFeed.next().close);
+  favoriteFeeds[favorite]={feed:favoriteFeed,closes,bias:news.bias};
+ }
+}
+function scanFavoritePairs(){
+ for(const [favorite,state] of Object.entries(favoriteFeeds)){
+  const candle=state.feed.next();state.closes.push(candle.close);
+  if(state.closes.length>60)state.closes.shift();
+  const signal=calculateSignal(state.closes,state.bias);
+  if(favorite!==pair&&(signal==='BUY'||signal==='SELL')){
+   favoriteAlerts.unshift({pair:favorite,signal,time:Date.now(),price:candle.close});
+   favoriteAlerts=favoriteAlerts.slice(0,5);
+  }
+ }
+}
+function toggleFavorite(){
+ if(favorites.includes(pair))favorites=favorites.filter(item=>item!==pair);
+ else favorites.push(pair);
+ localStorage.setItem('fxpilot.favorites',JSON.stringify(favorites));
+ syncFavoriteFeeds();renderFavorites();
+}
+function renderFavorites(){
+ $('#favoriteToggle').textContent=(favorites.includes(pair)?'★ Remove ':'☆ Add ')+pair+(favorites.includes(pair)?' from favorites':' to favorites');
+ $('#favoriteList').innerHTML=favorites.length?favorites.map(favorite=>`<div class="watch-item"><b>${favorite}</b><button type="button" data-remove-favorite="${favorite}" aria-label="Remove ${favorite} from favorites">Remove</button></div>`).join():'<div class="empty">No favorites yet. Select a pair and add it to your watchlist.</div>';
+ $('#favoriteAlerts').innerHTML=favoriteAlerts.length?favoriteAlerts.map(alert=>`<div class="watch-alert ${alert.signal==='BUY'?'buy':'sell'}"><b>${alert.signal} setup · ${alert.pair}</b><span>Paper simulation signal · ${new Date(alert.time).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span></div>`).join(''):'<div class="subtle">No new favorite-pair signals.</div>';
+ $('#favoriteList').querySelectorAll('[data-remove-favorite]').forEach(button=>button.addEventListener('click',()=>{
+  favorites=favorites.filter(favorite=>favorite!==button.dataset.removeFavorite);
+  localStorage.setItem('fxpilot.favorites',JSON.stringify(favorites));syncFavoriteFeeds();renderFavorites();
+ }));
+}
+
+function render(){
+ const p=S.pos,open=p?(S.last-p.entry)*p.dir*p.units:0,eq=S.bal+open,w=S.trades.filter(t=>t.pnl>0).length,n=S.trades.length;
+ const st=p?`In ${p.dir>0?'long':'short'} @ ${fmt(p.entry)}`:S.halt?'Daily limit reached':'Watching market';
+ $('#stats').innerHTML=[['Equity','$'+eq.toFixed(2)],['Total profit / loss',(eq>=S.start?'+':'')+(eq-S.start).toFixed(2)],['Win rate',n?Math.round(w/n*100)+'%':'-'],['Closed trades',n],['Last signal',S.sig],['Status',st]]
+  .map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('');
+ const isTrade=S.sig==='BUY'||S.sig==='SELL',signalColor=S.sig==='BUY'?'up':S.sig==='SELL'?'dn':'';
+ const reason=S.sig==='PAUSED'?'Daily loss threshold reached. New entries are paused until the next simulated day.':isTrade?`${S.sig==='BUY'?'Fast MA crossed above':'Fast MA crossed below'} the slow MA; RSI and sample currency bias passed the strategy filters.`:'No fresh moving-average crossover passed the RSI and sample-news filters.';
+ $('#signal').innerHTML=`<span class="mute">LATEST STRATEGY SIGNAL · DEMO</span><br><b class="${signalColor}">${S.sig}${isTrade?' · '+S.confidence+'% confidence':''}</b><p>${reason}</p>`;
+ $('#price').textContent='Last synthetic price · '+fmt(S.last);
+ $('#log').innerHTML=S.trades.slice(-15).reverse().map(t=>`<tr><td>${new Date(t.t*1e3).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</td><td class="${t.dir>0?'up':'dn'}">${t.dir>0?'Buy':'Sell'}</td><td>${fmt(t.entry)}</td><td>${fmt(t.exit)}</td><td class="${t.pnl>=0?'up':'dn'}">${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}</td></tr>`).join('')||'<tr><td colspan="5" class="mute">No closed trades yet.</td></tr>';
+ renderFavorites();
+}
+const savedFrame=localStorage.getItem('fxpilot.timeframe');
+if(savedFrame&&FRAMES[savedFrame])$('#timeframe').value=savedFrame;
+$('#pair').addEventListener('change',build);
+$('#timeframe').addEventListener('change',build);
+$('#rerun').onclick=build;
+$('#favoriteToggle').onclick=toggleFavorite;
+$('#riskProfile').addEventListener('change',e=>{
+ const profiles={cautious:{risk:.5,sl:.5,tp:1,dd:2,label:'Cautious'},balanced:{risk:1,sl:.4,tp:.8,dd:3,label:'Balanced'},higher:{risk:1.5,sl:.5,tp:1,dd:4,label:'Higher risk'}};
+ const profile=profiles[e.target.value];if(!profile)return;
+ for(const key of ['risk','sl','tp','dd'])$('#'+key).value=profile[key];
+ $('#riskSummary').textContent=`${profile.label}: up to ${profile.risk}% risk per simulated trade, ${profile.dd}% daily loss limit.`;
+ build();
+});
+for(const id of ['risk','sl','tp','dd'])$('#'+id).addEventListener('input',()=>{
+ $('#riskProfile').value='custom';$('#riskSummary').textContent='Custom risk values apply to the paper simulation.';
+});
+$('#run').onclick=e=>{const off=e.target.dataset.off!=='1';e.target.dataset.off=off?'1':'0';e.target.textContent=off?'Resume simulation':'Pause simulation';clearInterval(timer);if(!off)timer=setInterval(tick,1200)};
+window.addEventListener('resize',drawChart);
+build();
+</script></body></html>
