@@ -8,10 +8,13 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "invite": "node server.mjs invite",
-    "admin": "node server.mjs create-admin"
+    "invite": "node scripts/manage-cloud.mjs invite",
+    "admin": "node scripts/manage-cloud.mjs admin",
+    "invite:local": "node server.mjs invite",
+    "admin:local": "node server.mjs create-admin"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.2",
     "express": "^5.1.0"
   }
 }

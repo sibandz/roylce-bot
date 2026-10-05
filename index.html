@@ -576,7 +576,9 @@ async function apiRequest(path,options={}){
   response=await fetch(path,{...options,credentials:'same-origin',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
  }catch(error){
   if(error.name==='AbortError')throw error;
-  throw new Error('Cannot reach the account server. In PowerShell run npm.cmd start and keep that window open, then open the site at http://localhost:3000.');
+  throw new Error(serverHosted
+   ?'Cannot reach the deployed account API. Confirm the Vercel deployment includes the api/ functions.'
+   :'Cannot reach the account server. In PowerShell run npm.cmd start and keep that window open, then open the site at http://localhost:3000.');
  }
  let result={};
  try{result=await response.json()}catch(error){if(response.ok)throw new Error('The server returned an unreadable response.')}
@@ -628,7 +630,7 @@ async function initializeAuth(){
   await finishAuthentication(result.user);
  }catch(error){
   if(error.status===401)showAuth('login');
-  else showAuth('login','Account server is unavailable. Your account and demo trades are not stored on this device; please try again when the server is reachable.');
+  else showAuth('login',error.status?error.message:'Account server is unavailable. Your account and demo trades are not stored on this device; please try again when the server is reachable.');
  }
 }
 const savedFrame=localStorage.getItem('fxpilot.timeframe');
