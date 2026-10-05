@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "scripts": {
     "start": "node server.mjs",
@@ -12,7 +12,6 @@
     "admin": "node server.mjs create-admin"
   },
   "dependencies": {
-    "better-sqlite3": "^11.10.0",
     "express": "^5.1.0"
   }
 }

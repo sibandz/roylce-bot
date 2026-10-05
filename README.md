@@ -4,15 +4,15 @@ Rolyce Pilot is an invite-only FX practice and charting prototype. The live char
 
 ## Run locally
 
-Requires Node.js 20 or newer.
+Requires Node.js 22.13 or newer. SQLite is provided by Node.js, so no native addon compiler or separate Python install is needed.
 
 ```powershell
-npm install
+npm.cmd install
 $env:DATA_DIR = "$PWD\data"
-npm start
+npm.cmd start
 ```
 
-Open `http://localhost:3000`. The SQLite database is stored under `DATA_DIR` (default: `data\rolyce-pilot.sqlite`). Back up and persist this directory when deploying.
+Leave the terminal running while using the app, and open `http://localhost:3000` in the browser. The SQLite database is stored under `DATA_DIR` (default: `data\rolyce-pilot.sqlite`). Back up and persist this directory when deploying.
 The account and login screens require this Node server. Opening `index.html` directly is a local-only preview; it does not create server accounts or sync demo trades.
 
 ## Create the administrator login
@@ -20,7 +20,7 @@ The account and login screens require this Node server. Opening `index.html` dir
 Run this once on the server (or trusted machine) with the same `DATA_DIR` used by the app:
 
 ```powershell
-npm run admin -- admin
+npm.cmd run admin -- admin
 ```
 
 This creates a new `admin` account and generates a random password, shown only once in the terminal. Save it in a password manager. You can replace `admin` with another username. The command refuses to overwrite an existing account. Administrator passwords are stored as scrypt hashes; the login is the same login form used by invited users.
@@ -30,7 +30,7 @@ This creates a new `admin` account and generates a random password, shown only o
 Run this command on the server or a trusted admin machine that has access to the same `DATA_DIR`:
 
 ```powershell
-npm run invite -- "customer name or note"
+npm.cmd run invite -- "customer name or note"
 ```
 
 The one-time code is printed once, expires after 30 days, and should be sent privately to the invited user. The server stores only a hash of the code. Users choose a username and password (minimum 12 characters) when redeeming it. Passwords are scrypt-hashed and login sessions use HttpOnly, SameSite cookies.

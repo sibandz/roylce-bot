@@ -1,17 +1,17 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { DatabaseSync } from 'node:sqlite';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import Database from 'better-sqlite3';
 import express from 'express';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const dataDir = path.resolve(process.env.DATA_DIR || path.join(root, 'data'));
 fs.mkdirSync(dataDir, { recursive: true, mode: 0o700 });
-const db = new Database(path.join(dataDir, 'rolyce-pilot.sqlite'));
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+const db = new DatabaseSync(path.join(dataDir, 'rolyce-pilot.sqlite'));
+db.exec('PRAGMA journal_mode = WAL');
+db.exec('PRAGMA foreign_keys = ON');
 db.exec(`
  CREATE TABLE IF NOT EXISTS users (
    id INTEGER PRIMARY KEY,
@@ -36,7 +36,7 @@ db.exec(`
  );
  CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions(user_id);
 `);
-const userColumns = db.pragma('table_info(users)');
+const userColumns = db.prepare('PRAGMA table_info(users)').all();
 if (!userColumns.some(column => column.name === 'role')) {
   db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'))");
 }
@@ -193,7 +193,11 @@ app.post('/api/auth/signup', sameOrigin, rateLimit('signup', 8, 15 * 60 * 1000),
     }
     const salt = crypto.randomBytes(16).toString('hex');
     const passwordHash = (await scrypt(password, salt, 64)).toString('hex');
-    const createUser = db.transaction(() => {
+    let userId;
+    let transactionStarted = false;
+    try {
+      db.exec('BEGIN IMMEDIATE');
+      transactionStarted = true;
       const current = db.prepare('SELECT expires_at, used_at FROM signup_codes WHERE code_hash = ?')
         .get(invitation.code_hash);
       if (!current || current.used_at || current.expires_at <= Date.now()) {
@@ -203,14 +207,16 @@ app.post('/api/auth/signup', sameOrigin, rateLimit('signup', 8, 15 * 60 * 1000),
         .run(username, salt, passwordHash, Date.now());
       db.prepare('UPDATE signup_codes SET used_at = ? WHERE code_hash = ?')
         .run(Date.now(), invitation.code_hash);
-      return Number(result.lastInsertRowid);
-    });
-    let userId;
-    try {
-      userId = createUser();
+      db.exec('COMMIT');
+      transactionStarted = false;
+      userId = Number(result.lastInsertRowid);
     } catch (error) {
+      if (transactionStarted) db.exec('ROLLBACK');
       if (error.message === 'INVITE_USED') return res.status(400).json({ error: 'That signup code has already been used.' });
-      if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') return res.status(409).json({ error: 'That username is already taken.' });
+      if (error.code === 'ERR_SQLITE_CONSTRAINT_UNIQUE'
+        || error.message.includes('UNIQUE constraint failed: users.username')) {
+        return res.status(409).json({ error: 'That username is already taken.' });
+      }
       throw error;
     }
     issueSession(userId, res);

@@ -571,7 +571,13 @@ function escapeHtml(value){
  return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 }
 async function apiRequest(path,options={}){
- const response=await fetch(path,{...options,credentials:'same-origin',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
+ let response;
+ try{
+  response=await fetch(path,{...options,credentials:'same-origin',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
+ }catch(error){
+  if(error.name==='AbortError')throw error;
+  throw new Error('Cannot reach the account server. In PowerShell run npm.cmd start and keep that window open, then open the site at http://localhost:3000.');
+ }
  let result={};
  try{result=await response.json()}catch(error){if(response.ok)throw new Error('The server returned an unreadable response.')}
  if(!response.ok){const failure=new Error(result.error||`Request failed (${response.status}).`);failure.status=response.status;throw failure}
