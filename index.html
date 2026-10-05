@@ -541,7 +541,7 @@ function renderFavorites(){
 function render(){
  const liveMode=$('#mode').value==='live';
  const frame=FRAMES[$('#timeframe').value];
- $('#accountButton').textContent=currentUser?currentUser.username:serverHosted?'Log in':'Local preview';
+ $('#accountButton').textContent=currentUser?(currentUser.role==='admin'?'Admin · '+currentUser.username:currentUser.username):serverHosted?'Log in':'Local preview';
  $('#run').disabled=liveMode;
  $('#run').textContent=liveMode?(demoAccount.position?'Demo trade protection running':'Simulation paused in live view'):$('#run').dataset.off==='1'?'Resume simulation':'Pause simulation';
  $('#stats').innerHTML=(liveMode?[['Chart data','TradingView'],['Live signals','Unavailable'],['Trading','Disabled']]:[['Feed','Synthetic demo'],['Pair',pair],['Timeframe',frame.label],['Demo price',fmt(S.last)],['Bot signal',S.sig],['Status','Paper mode']])
@@ -675,7 +675,7 @@ $('#authForm').addEventListener('submit',async event=>{
  finally{submit.disabled=false}
 });
 $('#accountButton').addEventListener('click',()=>{
- if(currentUser){$('#accountName').textContent=`Signed in as ${currentUser.username}`;$('#accountDialog').showModal()}
+ if(currentUser){$('#accountName').textContent=`Signed in as ${currentUser.username} · ${currentUser.role==='admin'?'Administrator':'User'}`;$('#logoutButton').classList.remove('hidden');$('#accountDialog').showModal()}
  else if(serverHosted)showAuth('login');
  else{$('#accountName').textContent='This local preview stores demo trades only in this browser. Start the Node server to use invited accounts.';$('#logoutButton').classList.add('hidden');$('#accountDialog').showModal()}
 });

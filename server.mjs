@@ -18,6 +18,7 @@ db.exec(`
    username TEXT NOT NULL UNIQUE COLLATE NOCASE,
    salt TEXT NOT NULL,
    password_hash TEXT NOT NULL,
+   role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
    created_at INTEGER NOT NULL,
    demo_state TEXT
  );
@@ -35,6 +36,10 @@ db.exec(`
  );
  CREATE INDEX IF NOT EXISTS sessions_user_id ON sessions(user_id);
 `);
+const userColumns = db.pragma('table_info(users)');
+if (!userColumns.some(column => column.name === 'role')) {
+  db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'))");
+}
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -121,7 +126,7 @@ function requireUser(req, res, next) {
   const token = readCookie(req, SESSION_COOKIE);
   if (!token) return res.status(401).json({ error: 'Please log in.' });
   const session = db.prepare(`
-    SELECT users.id, users.username, sessions.expires_at
+    SELECT users.id, users.username, users.role, sessions.expires_at
     FROM sessions JOIN users ON users.id = sessions.user_id
     WHERE sessions.token_hash = ?
   `).get(hash(token));
@@ -130,7 +135,7 @@ function requireUser(req, res, next) {
     res.clearCookie(SESSION_COOKIE, cookieOptions(0));
     return res.status(401).json({ error: 'Your session expired. Please log in again.' });
   }
-  req.user = { id: session.id, username: session.username };
+  req.user = { id: session.id, username: session.username, role: session.role };
   next();
 }
 
@@ -209,7 +214,7 @@ app.post('/api/auth/signup', sameOrigin, rateLimit('signup', 8, 15 * 60 * 1000),
       throw error;
     }
     issueSession(userId, res);
-    res.status(201).json({ user: { id: userId, username } });
+    res.status(201).json({ user: { id: userId, username, role: 'user' } });
   } catch (error) {
     next(error);
   }
@@ -227,7 +232,8 @@ app.post('/api/auth/login', sameOrigin, rateLimit('login', 10, 15 * 60 * 1000), 
     const match = crypto.timingSafeEqual(Buffer.from(candidate, 'hex'), Buffer.from(expected, 'hex'));
     if (!user || !match) return res.status(401).json({ error: 'Username or password is incorrect.' });
     issueSession(user.id, res);
-    res.json({ user: { id: user.id, username: user.username } });
+    const account = db.prepare('SELECT role FROM users WHERE id = ?').get(user.id);
+    res.json({ user: { id: user.id, username: user.username, role: account.role } });
   } catch (error) {
     next(error);
   }
@@ -267,10 +273,31 @@ function generateInvite(label = 'standard') {
   return code;
 }
 
+async function createAdminAccount(username) {
+  if (!/^[A-Za-z0-9_.-]{3,32}$/.test(username)) {
+    throw new Error('Choose a username that is 3–32 letters, numbers, dots, underscores, or hyphens.');
+  }
+  if (db.prepare('SELECT 1 FROM users WHERE username = ?').get(username)) {
+    throw new Error(`The username "${username}" already exists. Admin setup only creates new accounts; no existing account was changed.`);
+  }
+  const password = crypto.randomBytes(24).toString('base64url');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const passwordHash = (await scrypt(password, salt, 64)).toString('hex');
+  db.prepare('INSERT INTO users (username, salt, password_hash, role, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(username, salt, passwordHash, 'admin', Date.now());
+  console.log(`Rolyce Pilot administrator created.\nUsername: ${username}\nTemporary password (shown once): ${password}\nSave this password in a password manager. It cannot be retrieved from the database.`);
+}
+
 if (process.argv[2] === 'invite') {
   const label = process.argv.slice(3).join(' ').trim() || 'standard';
   console.log(`One-time Rolyce Pilot signup code (${label}; expires in 30 days):\n${generateInvite(label)}\nGive this code to the invited user. It will only be shown once.`);
   db.close();
+} else if (process.argv[2] === 'create-admin') {
+  const username = process.argv[3] || 'admin';
+  createAdminAccount(username).catch(error => {
+    console.error(`Could not create administrator: ${error.message}`);
+    process.exitCode = 1;
+  }).finally(() => db.close());
 } else {
   const server = app.listen(PORT, () => console.log(`Rolyce Pilot listening on port ${PORT}`));
   const close = () => server.close(() => {

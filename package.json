@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "invite": "node server.mjs invite"
+    "invite": "node server.mjs invite",
+    "admin": "node server.mjs create-admin"
   },
   "dependencies": {
     "better-sqlite3": "^11.10.0",
