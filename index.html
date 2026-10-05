@@ -702,4 +702,28 @@ $('#closeContact').addEventListener('click',()=>$('#contactDialog').close());
 $('#closeAccount').addEventListener('click',()=>$('#accountDialog').close());
 build();
 initializeAuth();
-</script></body></html>
+</script>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyA1VI46eX9aMW32gUvj8dO6dytM4Tl9SLs",
+    authDomain: "roylce-bot.firebaseapp.com",
+    projectId: "roylce-bot",
+    storageBucket: "roylce-bot.firebasestorage.app",
+    messagingSenderId: "765567862313",
+    appId: "1:765567862313:web:deb445de1cc63729b43e38",
+    measurementId: "G-6C1J4VYNYT"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</body></html>
