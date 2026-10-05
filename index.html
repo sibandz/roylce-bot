@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FX Pilot: currency paper-trading bot</title>
+<title>Rolyce Pilot · FX practice</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f3f5f8;--panel:#fff;--ink:#17212b;--mute:#738092;--line:#e5e9ef;--buy:#12805c;--sell:#cf514c;--acc:#425fe3;--nav:#111a27}
+:root{--bg:#f6f7f8;--panel:#fff;--ink:#18212b;--mute:#75808d;--line:#e7eaee;--buy:#138363;--sell:#c95858;--acc:#4665dc;--nav:#16202b}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 'Instrument Sans',system-ui,sans-serif}
-header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:13px 22px;background:var(--nav);color:#fff;border-bottom:1px solid #263344}
-h1{font-size:17px;letter-spacing:-.03em;margin:0 12px 0 0}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 20px;background:var(--nav);color:#fff;border-bottom:1px solid #263344}
+h1{font-size:16px;letter-spacing:-.035em;margin:0 10px 0 0}
 input,button,select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
 button{cursor:pointer;font-weight:600;transition:filter .15s}button:hover{filter:brightness(.96)}button.go{background:var(--acc);border-color:var(--acc);color:#fff}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 main{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px;padding:20px 22px;max-width:1600px;margin:auto}
-section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;box-shadow:0 2px 8px #192a3a08}
+section{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:15px;min-width:0;box-shadow:0 1px 4px #192a3a06}
 h2{font-size:14px;letter-spacing:-.01em;margin:0 0 12px}
 .chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
 .chart-head h2{margin:0}
 #chart{height:390px;width:100%;position:relative}
-#chart canvas{display:block;width:100%;height:100%}
-#tvChart{height:470px;width:100%;min-width:0;position:relative;overflow:hidden;border-radius:6px}
+#chart canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+#charts{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
+#tvChart{height:390px;width:100%;min-width:0;position:relative;overflow:hidden;border-radius:6px}
 #tvChart .tradingview-widget-container__widget,#tvChart iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .chart-legend{display:flex;gap:14px;align-items:center;padding:4px 0 0}
 .legend-item{font-size:11px;color:var(--mute)}.swatch{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
@@ -28,10 +29,19 @@ h2{font-size:14px;letter-spacing:-.01em;margin:0 0 12px}
 .stats span,.mute{color:var(--mute);font-size:12px}
 label{display:flex;justify-content:space-between;align-items:center;margin:9px 0;gap:8px}label input,label select{width:115px}
 .news{list-style:none;margin:0;padding:0}.news li{padding:9px 0;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:space-between}
+.news li>span:first-child{min-width:0}
+.news-link,.news-card{color:var(--acc);font-size:11px;font-weight:600;text-decoration:none}
+.news-link:hover,.news-card:hover{text-decoration:underline}
+.news-more{margin-top:8px}
+.news-more summary{padding:9px 0;color:var(--acc)}
+.news-more>p{margin:4px 0 8px}
+.news-links{display:grid;gap:7px}
+.news-card{display:block;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:#f8fafb}
 .up{color:var(--buy)}.dn{color:var(--sell)}
-.wide{grid-column:1/-1;overflow-x:auto}
+.wide{overflow-x:auto}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 8px;border-top:1px solid var(--line);white-space:nowrap}th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute)}
-.side{display:flex;flex-direction:column;gap:14px}
+.side{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;gap:12px}
+.side-column{display:flex;flex-direction:column;align-self:start;gap:12px;min-width:0}
 .badge{font-size:11px;font-weight:700;border-radius:20px;padding:4px 9px;white-space:nowrap}
 .demo{color:#ffdc8b;background:#3a321c}.live{color:#cee5fa;background:#26394d}
 .signal-box{padding:10px;border-radius:7px;background:#f6f8fa;margin-top:10px}.signal-box b{font-size:15px}
@@ -48,49 +58,159 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:9px 8px;
 .subtle{font-size:11px;color:var(--mute);margin:5px 0 10px}
 details{border-top:1px solid var(--line);margin-top:10px;padding-top:9px}
 summary{cursor:pointer;font-size:12px;font-weight:600}
-@media(max-width:900px){main{grid-template-columns:1fr;padding:14px}.side{display:grid;grid-template-columns:1fr 1fr}.side section:last-child{grid-column:1/-1}}
-@media(max-width:580px){header{padding:12px}main{padding:10px;gap:10px}.side{display:flex}#chart{height:290px}#tvChart{height:390px}.chart-head{align-items:flex-start;flex-direction:column}.wide{padding:12px}}
+.hidden{display:none!important}
+.mode-label{color:#c2ccd8;margin:0}
+.mode-label select{min-width:155px}
+.practice-ticket{border:1px solid var(--line);padding:10px;border-radius:8px;margin:10px 0;background:#f8fafb}
+.ticket-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.ticket-grid div{padding:7px;background:#fff;border-radius:6px;min-width:0}
+.ticket-grid span{display:block;color:var(--mute);font-size:10px}
+.ticket-grid b{font-size:12px;overflow-wrap:anywhere}
+.trade-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.trade-actions button{padding:9px 6px}
+.buy-button{background:var(--buy);border-color:var(--buy);color:white}
+.sell-button{background:var(--sell);border-color:var(--sell);color:white}
+.close-button{width:100%;margin-top:8px}
+.demo-ledger{max-height:200px;overflow:auto}
+.demo-ledger td,.demo-ledger th{padding:6px 4px;font-size:11px}
+.trade-direction{display:flex;gap:8px;align-items:center;margin:8px 0}
+.trade-direction select{flex:1}
+.chart-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 6px}
+.chart-tools select{min-width:155px}
+.chart-tools button{padding:6px 10px}
+.chart-hint{margin:4px 0 8px}
+.auto-setting{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;font-size:12px}
+.auto-setting input{width:17px;height:17px}
+.auth-shade{position:fixed;inset:0;z-index:20;background:#111a27b8;display:grid;place-items:center;padding:16px}
+.auth-card,.dialog-card{width:min(440px,100%);background:#fff;border-radius:12px;padding:22px;box-shadow:0 18px 70px #0003}
+.auth-card h2,.dialog-card h2{font-size:20px;margin:0 0 6px}
+.auth-card label{display:block;font-size:12px;color:var(--mute)}
+.auth-card input{display:block;width:100%;margin-top:4px;padding:10px}
+.auth-card button{min-height:42px}
+.auth-actions{display:flex;gap:8px;margin-top:12px}
+.auth-actions button{flex:1}
+.auth-error{min-height:20px;color:var(--sell);font-size:12px;margin:7px 0}
+.dialog-card p{color:var(--mute)}
+.button-link{display:inline-block;padding:8px 12px;background:var(--acc);color:white;text-decoration:none;border-radius:6px;font-weight:600}
+dialog{border:0;border-radius:12px;padding:0;max-width:min(440px,calc(100vw - 24px));width:100%}
+dialog::backdrop{background:#111a27a8}
+.dialog-head{display:flex;justify-content:space-between;align-items:center}
+.dialog-head button{border:0;font-size:20px}
+body.auth-locked main{filter:blur(2px);pointer-events:none;user-select:none}
+button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:900px){main{grid-template-columns:1fr;padding:14px}#charts{grid-template-columns:1fr}.side{grid-template-columns:1fr}.side-column{gap:9px}}
+@media(max-width:580px){
+ header{padding:10px;gap:8px}
+ header h1{width:100%;margin:0 0 2px}
+ header>label{flex:1 1 calc(50% - 8px)!important;min-width:0}
+ header>label select{width:100%;min-width:0}
+ header>button{flex:1 1 calc(50% - 8px);min-height:42px}
+ header>.badge{font-size:10px}
+ header>.mute{width:100%}
+ header>#accountButton,header>#contactButton{flex:1 1 calc(50% - 8px);min-height:40px}
+ main{padding:9px;gap:9px}
+ section{padding:12px;border-radius:8px}
+ .side{display:grid;grid-template-columns:1fr;gap:9px}
+ #chart{height:280px}
+ #tvChart{height:320px}
+ .chart-head{align-items:flex-start;flex-direction:column;gap:4px}
+ .chart-legend{flex-wrap:wrap;gap:7px}
+ .stats div{padding:8px}
+ .stats b{font-size:14px}
+ .trade-actions button{min-height:44px}
+ .chart-tools select{flex:1;min-width:130px}
+ .chart-tools button{min-height:40px}
+ .auth-card,.dialog-card{padding:18px}
+}
 </style></head><body>
 <header>
- <h1>FX Pilot</h1>
+ <h1>Rolyce Pilot</h1>
  <label class="mute" style="margin:0;color:#c2ccd8">Pair
   <select id="pair" aria-label="Currency pair"></select>
  </label>
  <label class="mute" style="margin:0;color:#c2ccd8">Timeframe
   <select id="timeframe" aria-label="Chart timeframe"><option value="5m">5 minutes</option><option value="15m">15 minutes</option><option value="1h" selected>1 hour</option><option value="4h">4 hours</option><option value="1d">1 day</option></select>
  </label>
+ <label class="mute mode-label">Mode
+  <select id="mode" aria-label="Trading mode"><option value="simulation" selected>Simulation</option><option value="live">Live market view</option></select>
+ </label>
  <button id="run">Pause simulation</button>
- <span class="badge live">LIVE CHART · TRADINGVIEW</span>
- <span class="badge demo">SIGNALS · PAPER SIMULATION</span>
- <span class="mute" style="color:#c2ccd8">Market data may be delayed · no broker connected</span>
+ <span class="badge demo" id="modeBadge">SIMULATION · PRACTICE ACCOUNT</span>
+ <span class="mute" style="color:#c2ccd8">Live charts are view-only · no broker connected</span>
+ <button id="accountButton" type="button">Log in</button>
+ <button id="contactButton" type="button">Contact us</button>
 </header>
-<main>
- <section><div class="chart-head"><h2 id="liveTitle">Live market chart · EUR/USD</h2><span class="mute" id="liveFrameLabel">TradingView · 1-hour candles</span></div><div id="tvChart"></div>
-  <p class="mute">Live chart from TradingView. Quote availability and delays depend on its data providers. The paper signals below do not use this feed.</p></section>
+<div id="authShade" class="auth-shade hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+ <div class="auth-card"><h2 id="authTitle">Welcome to Rolyce Pilot</h2><p id="authIntro" class="subtle">Log in with the account details you received.</p>
+  <form id="authForm">
+   <label>Username<input id="authUsername" autocomplete="username" minlength="3" maxlength="32" required></label>
+   <label id="inviteLabel" class="hidden">One-time signup code<input id="inviteCode" autocomplete="off"></label>
+   <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="12" required></label>
+   <p id="authError" class="auth-error" aria-live="polite"></p>
+   <button id="authSubmit" class="go full" type="submit">Log in</button>
+  </form>
+  <div class="auth-actions"><button id="authToggle" type="button">I have an invite code</button><button id="authContact" type="button">Contact us</button></div>
+  <p id="authFootnote" class="subtle">Invite-only accounts. Contact us if you need access.</p>
+ </div>
+</div>
+<dialog id="contactDialog"><div class="dialog-card"><div class="dialog-head"><h2>Contact Rolyce Pilot</h2><button id="closeContact" aria-label="Close dialog" type="button">×</button></div><p>For access, pricing, or questions, email:</p><p><a href="mailto:skndzamela@gmail.com">skndzamela@gmail.com</a></p><a class="button-link" href="mailto:skndzamela@gmail.com?subject=Rolyce%20Pilot%20enquiry">Send email</a></div></dialog>
+<dialog id="accountDialog"><div class="dialog-card"><div class="dialog-head"><h2>Your account</h2><button id="closeAccount" aria-label="Close account dialog" type="button">×</button></div><p id="accountName"></p><button id="logoutButton" type="button">Log out</button></div></dialog>
+<main id="appMain">
+ <div id="charts">
+ <section id="livePanel"><div class="chart-head"><h2 id="liveTitle">TradingView live market chart · EUR/USD</h2><span class="mute" id="liveFrameLabel">TradingView · 1-hour candles</span></div><div id="tvChart"></div>
+  <p class="mute">Live chart from TradingView. Quote availability and delays depend on its data providers. Live mode is view-only; any open practice trade continues to use simulated prices.</p></section>
+ <section id="simulationPanel"><div class="chart-head"><h2 id="title">Strategy simulation preview</h2><span class="mute" id="price">Synthetic demo prices</span></div>
+  <div class="chart-tools"><label style="margin:0">Add chart object<select id="chartTool" aria-label="Chart drawing tool"><option value="cursor">Cursor</option><option value="horizontal">Horizontal level</option><option value="trend">Trend line</option><option value="long">Long position</option><option value="short">Short position</option></select></label><button id="clearDrawings" type="button">Clear drawings</button><span class="subtle chart-hint" id="drawHint">Choose a tool and tap/click the chart to place it.</span></div>
+  <div id="chart"><canvas id="plot" role="img" aria-label="Simulated candlestick chart with trade signals and drawing tools"></canvas></div>
+  <div class="chart-legend"><span class="legend-item"><i class="swatch" style="background:#138363"></i>Long / buy</span><span class="legend-item"><i class="swatch" style="background:#c95858"></i>Short / sell</span><span class="legend-item"><i class="swatch" style="background:#4665dc"></i>Fast MA</span><span class="legend-item"><i class="swatch" style="background:#d98a1c"></i>Slow MA</span></div>
+  <p class="mute">Simulation candles are synthetic. Drawings, directions, recommendations, and practice orders are for demonstration only.</p></section>
+ </div>
  <div class="side">
-  <section><h2>Paper account</h2><div class="stats" id="stats"></div><div class="signal-box" id="signal"></div></section>
-  <section><h2>Simple risk setting</h2>
-   <label>Risk style<select id="riskProfile" aria-label="Risk style"><option value="cautious">Cautious</option><option value="balanced" selected>Balanced</option><option value="higher">Higher risk</option><option value="custom">Custom</option></select></label>
-   <p id="riskSummary" class="subtle">Balanced: up to 1% risk per simulated trade, 3% daily loss limit.</p>
-   <details><summary>Advanced risk controls</summary>
-    <label>Risk per trade (%)<input id="risk" type="number" value="1" step="0.25" min="0.1"></label>
-    <label>Stop-loss (%)<input id="sl" type="number" value="0.4" step="0.1" min="0.05"></label>
-    <label>Take-profit (%)<input id="tp" type="number" value="0.8" step="0.1" min="0.05"></label>
-    <label>Daily loss limit (%)<input id="dd" type="number" value="3" step="0.5" min="0.5"></label>
-   </details>
-   <button id="rerun" class="full">Apply settings &amp; reset simulation</button>
-   <p class="risk-note">Risk styles only change the local paper simulation. They do not predict losses or send broker orders.</p></section>
-  <section><h2>Favorite pair alerts</h2>
+  <div class="side-column">
+  <section id="statusPanel"><h2 id="accountHeading">Simulation status</h2><div class="stats" id="stats"></div><div class="signal-box" id="signal"></div></section>
+  <section id="favoritesPanel"><h2>Favorite pair alerts</h2>
    <button id="favoriteToggle" class="full">☆ Add selected pair</button>
    <p class="subtle">We’ll flag simulated signals here when you’re viewing a different pair.</p>
    <div id="favoriteList" class="watch-list"></div><div id="favoriteAlerts" aria-live="polite"></div>
   </section>
-  <section><h2>World news &amp; currency bias</h2><span class="badge live">SAMPLE HEADLINES</span><div id="bias" class="mute" style="margin-top:9px"></div><ul class="news" id="news"></ul></section>
+  </div>
+  <section id="demoPanel"><h2>Demo practice account</h2>
+   <p class="subtle">Virtual $10,000 starting balance · no real money involved</p>
+   <label class="trade-direction">Trade direction<select id="directionFilter" aria-label="Trade direction"><option value="any">Show long and short</option><option value="long">Long setups only</option><option value="short">Short setups only</option></select></label>
+   <div class="stats" id="demoStats"></div>
+   <div class="practice-ticket"><b id="setupTitle">Bot trade setup</b><p id="setupSummary" class="subtle">Waiting for a simulated signal.</p>
+    <div class="ticket-grid"><div><span>Entry</span><b id="setupEntry">—</b></div><div><span>Stop loss</span><b id="setupStop">—</b></div><div><span>Take profit</span><b id="setupTake">—</b></div></div>
+   </div>
+   <div class="trade-actions"><button id="practiceBuy" class="buy-button">Demo BUY</button><button id="practiceSell" class="sell-button">Demo SELL</button></div>
+   <button id="closePractice" class="close-button">Close demo trade</button>
+   <button id="resetPractice" class="full">Reset demo account</button>
+   <p id="practiceNotice" class="subtle" aria-live="polite">Practice trades use simulated prices only. Demo stop-loss and take-profit checks are not based on live quotes.</p>
+   <h3 style="font-size:12px;margin:12px 0 4px">Demo trade history</h3>
+   <div class="demo-ledger"><table><thead><tr><th>Pair</th><th>Side</th><th>Exit</th><th>P/L</th></tr></thead><tbody id="demoLog"></tbody></table></div>
+  </section>
+  <div class="side-column">
+  <section id="riskPanel"><h2>Simple risk setting</h2>
+   <label>Risk style<select id="riskProfile" aria-label="Risk style"><option value="cautious">Cautious</option><option value="balanced" selected>Balanced</option><option value="higher">Higher risk</option><option value="custom">Custom</option></select></label>
+   <p id="riskSummary" class="subtle">Balanced: if the stop is hit, planned loss is about 0.5% of demo balance. Daily limit: 3%.</p>
+   <details><summary>Advanced risk controls</summary>
+    <label>Risk per trade (%)<input id="risk" type="number" value="0.5" step="0.25" min="0.1"></label>
+    <label class="auto-setting">Auto-adjust stop loss to ATR<input id="autoSl" type="checkbox" checked></label>
+    <label>Stop-loss (%)<input id="sl" type="number" value="1.5" step="0.25" min="0.1"></label>
+    <label class="auto-setting">Auto-adjust take profit to ATR<input id="autoTp" type="checkbox" checked></label>
+    <label>Take-profit (%)<input id="tp" type="number" value="3" step="0.5" min="0.1"></label>
+    <label>Daily loss limit (%)<input id="dd" type="number" value="3" step="0.5" min="0.5"></label>
+   </details>
+   <button id="rerun" class="full">Apply settings &amp; reset simulation</button>
+   <p class="risk-note">Risk % estimates what you could lose if the stop is hit. These settings only affect the practice account; they never send broker orders.</p></section>
+  <section id="worldNewsPanel"><h2>World news &amp; currency bias</h2><span class="badge live">SAMPLE HEADLINES</span><div id="bias" class="mute" style="margin-top:9px"></div><ul class="news" id="news"></ul>
+   <details class="news-more"><summary>More news, forecasts &amp; predictions</summary>
+    <p class="subtle">Open current article and forecast searches for the selected currency pair:</p>
+    <div class="news-links" id="newsLinks"></div>
+    <p class="subtle">Headline examples above are for demonstration. Search links open Google News results; live news ingestion and generated forecasts are not connected.</p>
+   </details>
+  </section>
+  </div>
  </div>
- <section><div class="chart-head"><h2 id="title">Strategy simulation preview</h2><span class="mute" id="price">Synthetic demo prices</span></div><div id="chart"><canvas id="plot" role="img" aria-label="Simulated candlestick chart with buy and sell signals"></canvas></div>
-  <div class="chart-legend"><span class="legend-item"><i class="swatch" style="background:#12805c"></i>Buy / bullish candle</span><span class="legend-item"><i class="swatch" style="background:#cf514c"></i>Sell / bearish candle</span><span class="legend-item"><i class="swatch" style="background:#425fe3"></i>Fast MA</span><span class="legend-item"><i class="swatch" style="background:#d98a1c"></i>Slow MA</span></div>
-  <p class="mute">Strategy markers use synthetic demo candles only. Demo candles advance about every 1.2 seconds; they are not live signals and are not overlaid on the TradingView chart.</p></section>
- <section class="wide"><h2>Paper trade log</h2><table><thead><tr><th>Closed</th><th>Side</th><th>Entry</th><th>Exit</th><th>Profit / loss</th></tr></thead><tbody id="log"></tbody></table></section>
 </main>
 <script>
 const $=s=>document.querySelector(s);
@@ -103,9 +223,15 @@ const BASE={'EUR/USD':1.085,'GBP/USD':1.27,'USD/JPY':149,'USD/ZAR':18.2,'AUD/USD
 const USD_VALUE={USD:1,EUR:1.085,GBP:1.27,JPY:1/149,CHF:.88,CAD:1/1.36,AUD:.66,NZD:.6,ZAR:1/18.2,MXN:1/17.5,TRY:1/34,SGD:1/1.35,HKD:1/7.8,CNH:1/7.1};
 const FRAMES={'5m':{seconds:300,tv:'5',label:'5-minute'},'15m':{seconds:900,tv:'15',label:'15-minute'},'1h':{seconds:3600,tv:'60',label:'1-hour'},'4h':{seconds:14400,tv:'240',label:'4-hour'},'1d':{seconds:86400,tv:'D',label:'daily'}};
 $('#pair').innerHTML=PAIRS.map(p=>`<option value="${p}">${p.replace('/',' / ')}</option>`).join('');
-$('#pair').value=localStorage.getItem('fxpilot.pair')||'EUR/USD';
+const storedPair=localStorage.getItem('fxpilot.pair');
+$('#pair').value=PAIRS.includes(storedPair)?storedPair:'EUR/USD';
+$('#mode').value=localStorage.getItem('roylcePilot.mode')||'simulation';
+const serverHosted=location.protocol!=='file:';
+let currentUser=null,authMode='login',demoSaveTimer;
+if(serverHosted){document.body.classList.add('auth-locked');$('#authShade').classList.remove('hidden')}
 let favorites=JSON.parse(localStorage.getItem('fxpilot.favorites')||'[]').filter(p=>PAIRS.includes(p));
 let favoriteFeeds={},favoriteAlerts=[];
+let demoAccount=(()=>{if(serverHosted)return{balance:10000,position:null,trades:[]};try{const saved=JSON.parse(localStorage.getItem('roylcePilot.demo')||'null');return saved&&Number.isFinite(saved.balance)&&Array.isArray(saved.trades)?saved:{balance:10000,position:null,trades:[]}}catch(error){console.warn('Could not load the saved demo account; starting a new one.',error);return{balance:10000,position:null,trades:[]}}})();
 
 /* ---------- ADAPTER 1: market data ----------
    Demo: seeded random walk, one new hourly candle per tick.
@@ -114,7 +240,7 @@ const rng=s=>()=>(s=(s*16807)%2147483647)/2147483647;
 const seedOf=s=>{let h=7;for(const c of s)h=(h*31+c.charCodeAt(0))%2147483647;return h};
 function makeFeed(pair,seconds=FRAMES[$('#timeframe').value].seconds){
  const r=rng(seedOf(pair)),[base,quote]=pair.split('/');let p=BASE[pair]||(USD_VALUE[base]&&USD_VALUE[quote]?USD_VALUE[base]/USD_VALUE[quote]:.8+r()*1.5),t=Math.floor(Date.now()/1000/seconds)*seconds-300*seconds,i=0;
- return{p0:p,next(){const o=p,v=o*.0018,c=o+(r()-.5)*2*v+Math.sin(i++/22)*v*.4;
+ return{p0:p,next(){const o=p,v=o*.0007,c=o+(r()-.5)*2*v+Math.sin(i++/22)*v*.4;
   const h=Math.max(o,c)+r()*v*.5,l=Math.min(o,c)-r()*v*.5;p=c;t+=seconds;return{time:t,open:o,high:h,low:l,close:c}}}}
 
 /* ---------- ADAPTER 2: world news ----------
@@ -138,44 +264,96 @@ function getNews(pair){
 const avg=(a,n)=>a.length<n?null:a.slice(-n).reduce((x,y)=>x+y,0)/n;
 function rsi(a,n=14){if(a.length<n+1)return 50;let g=0,l=0;for(let i=a.length-n;i<a.length;i++){const d=a[i]-a[i-1];d>0?g+=d:l-=d}return l===0?100:100-100/(1+g/l)}
 
-/* ---------- bot engine (also used as the backtest over history) ---------- */
-let S,feed,timer,pair,dp=5;
+/* ---------- demo signal engine ---------- */
+let S,feed,timer,pair,dp=5,loadedTradingViewKey='';
 const cfg=()=>({risk:+$('#risk').value/100,sl:+$('#sl').value/100,tp:+$('#tp').value/100,dd:+$('#dd').value/100,fast:10,slow:30});
 const fmt=x=>x.toFixed(dp);
 function calculateSignal(closes,bias){
  if(closes.length<31)return'HOLD';
- const fast=avg(closes,10),slow=avg(closes,30),previous=closes.slice(0,-1),previousFast=avg(previous,10),previousSlow=avg(previous,30),momentum=rsi(closes);
- if(previousFast<=previousSlow&&fast>slow&&momentum<70&&bias>-.3)return'BUY';
- if(previousFast>=previousSlow&&fast<slow&&momentum>30&&bias<.3)return'SELL';
- return'HOLD';
+ const fast=avg(closes,10),slow=avg(closes,30),momentum=rsi(closes);
+ let signal='HOLD';
+ if(fast>slow&&momentum<70&&bias>-.3)signal='BUY';
+ if(fast<slow&&momentum>30&&bias<.3)signal='SELL';
+ if($('#directionFilter').value==='long'&&signal==='SELL')return'HOLD';
+ if($('#directionFilter').value==='short'&&signal==='BUY')return'HOLD';
+ return signal;
 }
 function validSettings(){
- const ranges=[['risk',.1,5],['sl',.05,10],['tp',.05,20],['dd',.5,20]];
- for(const [id,min,max] of ranges){const input=$('#'+id),value=Number(input.value);
+ const ranges=[['risk',.1,5],['sl',.1,20],['tp',.1,40],['dd',.5,20]];
+ for(const [id,min,max] of ranges){if((id==='sl'&&$('#autoSl').checked)||(id==='tp'&&$('#autoTp').checked))continue;const input=$('#'+id),value=Number(input.value);
   if(!Number.isFinite(value)||value<min||value>max){input.focus();alert(`${input.previousSibling.textContent.trim()} must be between ${min}% and ${max}%.`);return false}}
  return true;
 }
 function step(c){
- const k=cfg(),prev=S.cl.slice();S.cl.push(c.close);S.cs.push(c);
- const f=avg(S.cl,k.fast),s=avg(S.cl,k.slow),pf=avg(prev,k.fast),ps=avg(prev,k.slow);
+ S.cl.push(c.close);S.cs.push(c);
+ const f=avg(S.cl,10),s=avg(S.cl,30);
  if(f)S.fl.push({time:c.time,value:f});if(s)S.sl.push({time:c.time,value:s});
- const sig=calculateSignal(S.cl,S.bias);
- S.sig=sig;S.last=c.close;S.confidence=sig==='HOLD'?50:Math.min(90,Math.round(54+Math.min(18,Math.abs((f-s)/s)*12000)+Math.min(10,Math.abs(S.bias)*10)));
- const day=Math.floor(c.time/86400),p=S.pos;
- if(S.halt!==null&&S.halt!==day)S.halt=null;
- if(p){let ex=null;
-  if(p.dir>0){if(c.low<=p.sl)ex=p.sl;else if(c.high>=p.tp)ex=p.tp}
-  else{if(c.high>=p.sl)ex=p.sl;else if(c.low<=p.tp)ex=p.tp}
-  if(ex==null&&sig!=='HOLD'&&(sig==='BUY')!==(p.dir>0))ex=c.close;
-  if(ex!=null){const pnl=(ex-p.entry)*p.dir*p.units;S.bal+=pnl;S.day[day]=(S.day[day]||0)+pnl;
-   S.trades.push({t:c.time,dir:p.dir,entry:p.entry,exit:ex,pnl});S.pos=null;
-   S.mk.push({time:c.time,position:p.dir>0?'aboveBar':'belowBar',color:'#6b7787',shape:'circle',text:(pnl>=0?'+':'')+pnl.toFixed(0)})}}
- if((S.day[day]||0)<=-k.dd*S.start)S.halt=day;
- if(S.halt===day){S.sig='PAUSED';return}
- if(!S.pos&&sig!=='HOLD'){
-  const dir=sig==='BUY'?1:-1,e=c.close,dist=e*k.sl;
-  S.pos={dir,entry:e,units:S.bal*k.risk/dist,sl:e-dir*dist,tp:e+dir*e*k.tp};S.halt=null;
-  S.mk.push({time:c.time,position:dir>0?'belowBar':'aboveBar',color:dir>0?'#0f8a6a':'#c4423a',shape:dir>0?'arrowUp':'arrowDown',text:(dir>0?'BUY ':'SELL ')+fmt(e)})}
+ const previousSignal=S.sig,sig=calculateSignal(S.cl,S.bias);
+ S.sig=sig;S.last=c.close;
+ S.setup=sig==='BUY'||sig==='SELL'?makeSetup(sig,c.close):null;
+ if(S.setup&&sig!==previousSignal)S.mk.push({time:c.time,position:sig==='BUY'?'belowBar':'aboveBar',color:sig==='BUY'?'#12805c':'#cf514c',shape:sig==='BUY'?'arrowUp':'arrowDown',text:sig+' '+fmt(c.close)});
+}
+function makeSetup(side,price){
+ const dir=side==='BUY'?1:-1,recent=S.cs.slice(-15),atr=recent.reduce((sum,c,index)=>{
+  const previous=recent[index-1],trueRange=previous?Math.max(c.high-c.low,Math.abs(c.high-previous.close),Math.abs(c.low-previous.close)):c.high-c.low;
+  return sum+trueRange;
+ },0)/Math.max(1,recent.length);
+ const stopDistance=$('#autoSl').checked?Math.max(price*.015,atr*3):price*cfg().sl;
+ const takeDistance=$('#autoTp').checked?Math.max(price*.03,atr*6):price*cfg().tp;
+ return{side,entry:price,stop:price-dir*stopDistance,take:price+dir*takeDistance};
+}
+function makePracticeFeed(practicePosition){
+ const practiceFeed=makeFeed(practicePosition.pair,practicePosition.seconds);
+ for(let i=0;i<300;i++)practiceFeed.next();
+ return practiceFeed;
+}
+function saveDemoAccount(){
+ const account=JSON.parse(JSON.stringify(demoAccount,(key,value)=>key==='marketFeed'?undefined:value));
+ if(!serverHosted){
+  try{localStorage.setItem('roylcePilot.demo',JSON.stringify(account))}
+  catch(error){console.error('Could not save the demo account to this browser.',error);$('#practiceNotice').textContent='Browser storage failed; this demo account may not persist after closing the page.'}
+ }else if(currentUser){
+  clearTimeout(demoSaveTimer);
+  demoSaveTimer=setTimeout(()=>apiRequest('/api/demo',{method:'PUT',body:JSON.stringify({account})}).catch(error=>{
+   console.error('Could not sync the demo account to the server.',error);$('#practiceNotice').textContent='Could not sync your demo account. Check your connection before closing this page.';
+  }),250);
+ }
+}
+function openDemoTrade(side){
+ if(serverHosted&&!currentUser){showAuth('login');return}
+ if($('#mode').value!=='simulation'){alert('Switch to Simulation mode to place a demo practice trade.');return}
+ if(demoAccount.position){$('#practiceNotice').textContent='Close your open demo position before placing another.';return}
+ if(demoAccount.balance<=0){$('#practiceNotice').textContent='Your demo balance is empty. Reset the account to practice again.';return}
+ const today=new Date().toISOString().slice(0,10),todayLoss=demoAccount.trades.filter(trade=>new Date(trade.closedAt*1000).toISOString().slice(0,10)===today).reduce((loss,trade)=>loss+Math.min(0,trade.pnl),0);
+ if(todayLoss<=-demoAccount.balance*cfg().dd){$('#practiceNotice').textContent='The demo account daily loss limit has been reached. Try again tomorrow or reset the demo account.';return}
+ const setup=makeSetup(side,S.last),risk=demoAccount.balance*cfg().risk,quoteToUsd=USD_VALUE[pair.split('/')[1]]||1;
+ const position={pair,dir:side==='BUY'?1:-1,entry:setup.entry,stop:setup.stop,take:setup.take,units:risk/(Math.abs(setup.entry-setup.stop)*quoteToUsd),quoteToUsd,openedAt:Date.now(),seconds:FRAMES[$('#timeframe').value].seconds,lastPrice:S.last};
+ position.marketFeed=makePracticeFeed(position);demoAccount.position=position;
+ saveDemoAccount();$('#practiceNotice').textContent=`Demo ${side} opened at ${fmt(setup.entry)}. It will close automatically at its stop loss or take profit.`;render();
+}
+function closeDemoTrade(exit,reason='Closed manually',time=Math.floor(Date.now()/1000)){
+ const position=demoAccount.position;if(!position)return;
+ const pnl=(exit-position.entry)*position.dir*position.units*(position.quoteToUsd||USD_VALUE[position.pair.split('/')[1]]||1);
+ demoAccount.balance+=pnl;demoAccount.trades.unshift({pair:position.pair,dir:position.dir,entry:position.entry,exit,pnl,closedAt:time,reason});
+ demoAccount.trades=demoAccount.trades.slice(0,50);demoAccount.position=null;
+ saveDemoAccount();$('#practiceNotice').textContent=`Demo trade closed (${reason}). ${pnl>=0?'Profit':'Loss'}: $${Math.abs(pnl).toFixed(2)}.`;render();
+}
+function updateDemoPosition(){
+ const position=demoAccount.position;if(!position)return;
+ const candle=position.marketFeed.next();position.lastPrice=candle.close;
+ let exit=null,reason='';
+ if(position.dir>0){if(candle.low<=position.stop){exit=position.stop;reason='Stop loss'}else if(candle.high>=position.take){exit=position.take;reason='Take profit'}}
+ else{if(candle.high>=position.stop){exit=position.stop;reason='Stop loss'}else if(candle.low<=position.take){exit=position.take;reason='Take profit'}}
+ if(exit!==null)closeDemoTrade(exit,reason,candle.time);
+ else saveDemoAccount();
+}
+function clearDemoAccount(){
+ if(!confirm('Reset the demo account to $10,000 and erase its practice trade history?'))return;
+ demoAccount={balance:10000,position:null,trades:[]};saveDemoAccount();$('#practiceNotice').textContent='Demo account reset to $10,000.';render();
+}
+function demoEquity(){
+ const position=demoAccount.position;
+ return position?demoAccount.balance+(position.lastPrice-position.entry)*position.dir*position.units*(position.quoteToUsd||USD_VALUE[position.pair.split('/')[1]]||1):demoAccount.balance;
 }
 
 function drawChart(){
@@ -190,6 +368,7 @@ function drawChart(){
  for(const point of [...S.fl.slice(-data.length),...S.sl.slice(-data.length)]){lo=Math.min(lo,point.value);hi=Math.max(hi,point.value)}
  const pad=(hi-lo)*.08||.001;lo-=pad;hi+=pad;
  const x=i=>left+(i+.5)*plotW/data.length,y=v=>top+(hi-v)*plotH/(hi-lo);
+ S.plotScale={x,y,left,right,top,bottom,plotW,plotH,data,lo,hi};
  ctx.font='11px "Instrument Sans",system-ui,sans-serif';ctx.textBaseline='middle';
  for(let i=0;i<=4;i++){const py=top+plotH*i/4,val=hi-(hi-lo)*i/4;
   ctx.strokeStyle='#edf0f4';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(left,py);ctx.lineTo(w-right,py);ctx.stroke();
@@ -203,6 +382,7 @@ function drawChart(){
    if(!started){ctx.moveTo(x(i),y(point.value));started=true}else ctx.lineTo(x(i),y(point.value))}
   if(started)ctx.stroke()};
  line(S.fl,'#425fe3');line(S.sl,'#d98a1c');
+ drawChartObjects(ctx,S.plotScale,w);
  for(const marker of S.mk){const i=indexByTime.get(marker.time);if(i===undefined)continue;const cx=x(i),cy=marker.shape==='circle'?y(data[i].close):(marker.position==='belowBar'?y(data[i].low)+9:y(data[i].high)-9);
   if(marker.shape==='circle'){ctx.fillStyle='#738092';ctx.beginPath();ctx.arc(cx,cy,3,0,Math.PI*2);ctx.fill();continue}
   ctx.fillStyle=marker.color;ctx.beginPath();
@@ -210,6 +390,49 @@ function drawChart(){
   ctx.closePath();ctx.fill();ctx.font='bold 10px "Instrument Sans",system-ui,sans-serif';ctx.textAlign='center';ctx.fillText(marker.text.split(' ')[0],cx,marker.position==='belowBar'?cy+12:cy-10)}
  ctx.font='10px "Instrument Sans",system-ui,sans-serif';ctx.fillStyle='#738092';ctx.textAlign='center';
  for(let i=0;i<5;i++){const at=Math.round((data.length-1)*i/4),date=new Date(data[at].time*1000);ctx.fillText(date.toLocaleDateString([],{month:'short',day:'numeric'})+' '+date.toLocaleTimeString([],{hour:'2-digit'}),x(at),h-10)}
+}
+let drawings=[],drawingStart=null;
+function saveDrawings(){
+ try{localStorage.setItem(`roylcePilot.drawings.${pair}.${$('#timeframe').value}`,JSON.stringify(drawings))}
+ catch(error){console.error('Could not save chart drawings.',error);$('#drawHint').textContent='Could not save drawings in this browser.'}
+}
+function nearestDrawingX(time,scale){
+ let found=0,distance=Infinity;
+ scale.data.forEach((c,index)=>{const delta=Math.abs(c.time-time);if(delta<distance){distance=delta;found=index}});
+ return scale.x(found);
+}
+function drawChartObjects(ctx,scale,width){
+ for(const object of drawings){
+  ctx.save();
+  if(object.type==='horizontal'){
+   const py=scale.y(object.price);ctx.strokeStyle='#75808d';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(scale.left,py);ctx.lineTo(width-scale.right,py);ctx.stroke();
+   ctx.setLineDash([]);ctx.fillStyle='#566270';ctx.font='11px "Instrument Sans",system-ui,sans-serif';ctx.fillText('Level '+fmt(object.price),scale.left+5,py-7);
+  }else if(object.type==='trend'){
+   ctx.strokeStyle='#4665dc';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(nearestDrawingX(object.start.time,scale),scale.y(object.start.price));ctx.lineTo(nearestDrawingX(object.end.time,scale),scale.y(object.end.price));ctx.stroke();
+  }else{
+   const buy=object.type==='long',entryY=scale.y(object.entry),stopY=scale.y(object.stop),takeY=scale.y(object.take),startX=nearestDrawingX(object.time,scale),endX=width-scale.right;
+   ctx.fillStyle=buy?'#13836322':'#c9585822';ctx.fillRect(startX,Math.min(entryY,takeY),endX-startX,Math.abs(entryY-takeY));
+   ctx.fillStyle=buy?'#c9585822':'#13836322';ctx.fillRect(startX,Math.min(entryY,stopY),endX-startX,Math.abs(entryY-stopY));
+   ctx.strokeStyle=buy?'#138363':'#c95858';ctx.setLineDash([4,3]);
+   for(const py of [entryY,stopY,takeY]){ctx.beginPath();ctx.moveTo(startX,py);ctx.lineTo(endX,py);ctx.stroke()}
+   ctx.setLineDash([]);ctx.fillStyle=buy?'#138363':'#c95858';ctx.font='bold 11px "Instrument Sans",system-ui,sans-serif';ctx.fillText(buy?'LONG':'SHORT',startX+4,entryY-8);
+  }
+  ctx.restore();
+ }
+}
+function addChartPointer(point){
+ const scale=S?.plotScale;if(!scale)return;
+ const index=Math.max(0,Math.min(scale.data.length-1,Math.floor((point.x-scale.left)/(scale.plotW/scale.data.length))));
+ const candle=scale.data[index],price=Math.max(scale.lo,Math.min(scale.hi,scale.hi-(point.y-scale.top)*((scale.hi-scale.lo)/scale.plotH)));
+ const time=candle.time,tool=$('#chartTool').value;
+ if(tool==='cursor')return;
+ if(tool==='horizontal')drawings.push({type:tool,price});
+ else if(tool==='long'||tool==='short'){
+  const setup=makeSetup(tool==='long'?'BUY':'SELL',price);
+  drawings.push({type:tool,time,entry:price,stop:setup.stop,take:setup.take});
+ }else if(!drawingStart){drawingStart={time,price};$('#drawHint').textContent='Select the second point to finish the trend line.';return}
+ else{drawings.push({type:'trend',start:drawingStart,end:{time,price}});drawingStart=null}
+ saveDrawings();$('#drawHint').textContent='Object saved. Choose another tool or continue adding objects.';drawChart();
 }
 
 function build(){
@@ -219,26 +442,63 @@ function build(){
  $('#pair').value=pair;localStorage.setItem('fxpilot.pair',pair);
  const frame=FRAMES[$('#timeframe').value];
  localStorage.setItem('fxpilot.timeframe',$('#timeframe').value);
+ const liveMode=$('#mode').value==='live';
+ $('#modeBadge').textContent=liveMode?'LIVE CHART · SIGNALS DISABLED':'SIMULATION · PRACTICE ACCOUNT';
+ $('#modeBadge').className='badge '+(liveMode?'live':'demo');
+ $('#accountHeading').textContent=liveMode?'Live market view':'Simulation status';
+ $('#run').disabled=liveMode;
+ $('#run').textContent=liveMode?'Simulation paused in live view':$('#run').dataset.off==='1'?'Resume simulation':'Pause simulation';
  loadLiveChart(pair);
- $('#liveTitle').textContent='Live market chart · '+pair;
+ $('#liveTitle').textContent='TradingView live market chart · '+pair;
  $('#liveFrameLabel').textContent='TradingView · '+frame.label+' candles';
  feed=makeFeed(pair,frame.seconds);dp=feed.p0>50?2:feed.p0>5?3:5;
  const n=getNews(pair);
- S={cl:[],cs:[],fl:[],sl:[],mk:[],trades:[],bal:1e4,start:1e4,pos:null,day:{},bias:n.bias,halt:null,sig:'HOLD',confidence:50,last:feed.p0};
- for(let i=0;i<300;i++)step(feed.next());     // backtest over history
+ S={cl:[],cs:[],fl:[],sl:[],mk:[],bias:n.bias,sig:'HOLD',last:feed.p0};
+ try{drawings=JSON.parse(localStorage.getItem(`roylcePilot.drawings.${pair}.${$('#timeframe').value}`)||'[]');if(!Array.isArray(drawings))drawings=[]}
+ catch(error){console.warn('Could not load this chart’s saved drawings.',error);drawings=[]}
+ if(demoAccount.position&&!demoAccount.position.marketFeed){
+  demoAccount.position.seconds=demoAccount.position.seconds||(FRAMES[demoAccount.position.timeframe||'1h']||FRAMES['1h']).seconds;
+  demoAccount.position.lastPrice=demoAccount.position.lastPrice||demoAccount.position.entry;
+  demoAccount.position.marketFeed=makePracticeFeed(demoAccount.position);
+ }
+ for(let i=0;i<300;i++)step(feed.next());
  drawChart();
  $('#title').textContent=pair+' · '+frame.label+' strategy simulation';
  $('#bias').textContent=n.items.length?`News bias for ${pair}: ${n.bias>0?'+':''}${n.bias.toFixed(2)} (${n.bias>.15?'favours buying':n.bias<-.15?'favours selling':'neutral'})`:'No news loaded for this pair. Bias is neutral.';
- $('#news').innerHTML=n.items.map(i=>`<li><span>${i.title}<br><span class="mute">${i.ccy}</span></span><b class="${i.score>=0?'up':'dn'}">${i.score>0?'+':''}${i.score}</b></li>`).join('');
+ $('#news').innerHTML=n.items.map(i=>`<li><span>${i.title}<br><span class="mute">${i.ccy}</span><br><a class="news-link" href="${newsSearchUrl(i.title+' '+i.ccy+' currency')}" target="_blank" rel="noopener noreferrer">Find related articles ↗</a></span><b class="${i.score>=0?'up':'dn'}">${i.score>0?'+':''}${i.score}</b></li>`).join('');
+ renderNewsLinks();
  syncFavoriteFeeds();render();
- if($('#run').dataset.off!=='1')timer=setInterval(tick,1200);
+ if(serverHosted&&!currentUser)return;
+ if(liveMode&&demoAccount.position)timer=setInterval(tick,5000);
+ else if(!liveMode&&$('#run').dataset.off!=='1')timer=setInterval(tick,5000);
 }
-function tick(){const c=feed.next();step(c);scanFavoritePairs();drawChart();render()}
+function newsSearchUrl(query){
+ return 'https://news.google.com/search?q='+encodeURIComponent(query);
+}
+function renderNewsLinks(){
+ const [base,quote]=pair.split('/');
+ const searches=[
+  [`Latest ${base}/${quote} currency news`,`${base} ${quote} currency exchange latest news`],
+  [`${base}/${quote} forecasts & predictions`,`${base} ${quote} exchange rate forecast prediction`],
+  [`${base} outlook and market news`,`${base} currency outlook forecast news`],
+  [`${quote} outlook and market news`,`${quote} currency outlook forecast news`],
+  ['Economic calendar, rates & inflation',`${base} ${quote} economic calendar central bank rates inflation jobs`]
+ ];
+ $('#newsLinks').innerHTML=searches.map(([label,query])=>`<a class="news-card" href="${newsSearchUrl(query)}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`).join('');
+}
+function tick(){
+ if($('#mode').value==='live'&&!demoAccount.position){clearInterval(timer);timer=null;return}
+ const c=feed.next();step(c);updateDemoPosition();scanFavoritePairs();drawChart();render();
+}
 function loadLiveChart(pair){
+ const key=`${pair}:${$('#timeframe').value}`;
+ if(key===loadedTradingViewKey)return;
+ loadedTradingViewKey=key;
  const container=$('#tvChart');container.replaceChildren();
  const widget=document.createElement('div');widget.className='tradingview-widget-container__widget';container.appendChild(widget);
  const script=document.createElement('script');script.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';script.async=true;
  script.text=JSON.stringify({autosize:true,symbol:'FX:'+pair.replace('/',''),interval:FRAMES[$('#timeframe').value].tv,timezone:'Etc/UTC',theme:'light',style:'1',locale:'en',allow_symbol_change:false,hide_top_toolbar:true,hide_side_toolbar:true,calendar:false,support_host:'https://www.tradingview.com'});
+ script.onerror=()=>{if(loadedTradingViewKey===key)$('#liveTitle').textContent='TradingView chart unavailable · check your connection'};
  container.appendChild(script);
 }
 function syncFavoriteFeeds(){
@@ -246,18 +506,20 @@ function syncFavoriteFeeds(){
  for(const favorite of favorites){
   const favoriteFeed=makeFeed(favorite,FRAMES[$('#timeframe').value].seconds),news=getNews(favorite),closes=[];
   for(let i=0;i<60;i++)closes.push(favoriteFeed.next().close);
-  favoriteFeeds[favorite]={feed:favoriteFeed,closes,bias:news.bias};
+  favoriteFeeds[favorite]={feed:favoriteFeed,closes,bias:news.bias,signal:calculateSignal(closes,news.bias)};
  }
 }
 function scanFavoritePairs(){
+ if($('#mode').value==='live')return;
  for(const [favorite,state] of Object.entries(favoriteFeeds)){
   const candle=state.feed.next();state.closes.push(candle.close);
   if(state.closes.length>60)state.closes.shift();
   const signal=calculateSignal(state.closes,state.bias);
-  if(favorite!==pair&&(signal==='BUY'||signal==='SELL')){
+  if(favorite!==pair&&signal!==state.signal&&(signal==='BUY'||signal==='SELL')){
    favoriteAlerts.unshift({pair:favorite,signal,time:Date.now(),price:candle.close});
    favoriteAlerts=favoriteAlerts.slice(0,5);
   }
+  state.signal=signal;
  }
 }
 function toggleFavorite(){
@@ -277,34 +539,159 @@ function renderFavorites(){
 }
 
 function render(){
- const p=S.pos,open=p?(S.last-p.entry)*p.dir*p.units:0,eq=S.bal+open,w=S.trades.filter(t=>t.pnl>0).length,n=S.trades.length;
- const st=p?`In ${p.dir>0?'long':'short'} @ ${fmt(p.entry)}`:S.halt?'Daily limit reached':'Watching market';
- $('#stats').innerHTML=[['Equity','$'+eq.toFixed(2)],['Total profit / loss',(eq>=S.start?'+':'')+(eq-S.start).toFixed(2)],['Win rate',n?Math.round(w/n*100)+'%':'-'],['Closed trades',n],['Last signal',S.sig],['Status',st]]
+ const liveMode=$('#mode').value==='live';
+ const frame=FRAMES[$('#timeframe').value];
+ $('#accountButton').textContent=currentUser?currentUser.username:serverHosted?'Log in':'Local preview';
+ $('#run').disabled=liveMode;
+ $('#run').textContent=liveMode?(demoAccount.position?'Demo trade protection running':'Simulation paused in live view'):$('#run').dataset.off==='1'?'Resume simulation':'Pause simulation';
+ $('#stats').innerHTML=(liveMode?[['Chart data','TradingView'],['Live signals','Unavailable'],['Trading','Disabled']]:[['Feed','Synthetic demo'],['Pair',pair],['Timeframe',frame.label],['Demo price',fmt(S.last)],['Bot signal',S.sig],['Status','Paper mode']])
   .map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('');
  const isTrade=S.sig==='BUY'||S.sig==='SELL',signalColor=S.sig==='BUY'?'up':S.sig==='SELL'?'dn':'';
- const reason=S.sig==='PAUSED'?'Daily loss threshold reached. New entries are paused until the next simulated day.':isTrade?`${S.sig==='BUY'?'Fast MA crossed above':'Fast MA crossed below'} the slow MA; RSI and sample currency bias passed the strategy filters.`:'No fresh moving-average crossover passed the RSI and sample-news filters.';
- $('#signal').innerHTML=`<span class="mute">LATEST STRATEGY SIGNAL · DEMO</span><br><b class="${signalColor}">${S.sig}${isTrade?' · '+S.confidence+'% confidence':''}</b><p>${reason}</p>`;
+ const reason=liveMode?'Live chart only. This page does not receive live candles for signal analysis, so it will not produce live BUY/SELL calls.':isTrade?`${S.sig==='BUY'?'Fast MA is above':'Fast MA is below'} the slow MA, with RSI and sample currency bias passing the demo filters.`:'Trend, RSI, and sample-news filters do not currently align.';
+ $('#signal').innerHTML=`<span class="mute">${liveMode?'LIVE MODE · SIGNALS OFF':'SIMULATION · DEMO-ONLY SIGNAL'}</span><br><b class="${liveMode?'':signalColor}">${liveMode?'NO LIVE SIGNAL':S.sig}</b><p>${reason}</p>`;
  $('#price').textContent='Last synthetic price · '+fmt(S.last);
- $('#log').innerHTML=S.trades.slice(-15).reverse().map(t=>`<tr><td>${new Date(t.t*1e3).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</td><td class="${t.dir>0?'up':'dn'}">${t.dir>0?'Buy':'Sell'}</td><td>${fmt(t.entry)}</td><td>${fmt(t.exit)}</td><td class="${t.pnl>=0?'up':'dn'}">${t.pnl>=0?'+':''}${t.pnl.toFixed(2)}</td></tr>`).join('')||'<tr><td colspan="5" class="mute">No closed trades yet.</td></tr>';
+ const position=demoAccount.position,openPnl=position?(position.lastPrice-position.entry)*position.dir*position.units*(position.quoteToUsd||USD_VALUE[position.pair.split('/')[1]]||1):0;
+ $('#demoStats').innerHTML=[['Balance','$'+demoAccount.balance.toFixed(2)],['Equity','$'+demoEquity().toFixed(2)],['Open position',position?`${position.dir>0?'BUY':'SELL'} ${position.pair}`:'None'],['Open P/L',position?(openPnl>=0?'+':'-')+'$'+Math.abs(openPnl).toFixed(2):'—']]
+  .map(([a,b])=>`<div><span>${a}</span><b>${b}</b></div>`).join('');
+ const setup=liveMode?null:S.setup;
+ $('#setupTitle').textContent=position?`Open ${position.dir>0?'BUY':'SELL'} · ${position.pair}`:setup?`Bot suggests ${setup.side} · DEMO ONLY`:'Bot trade setup';
+ $('#setupSummary').textContent=position?`Practice position is protected by its stop loss and take profit.`:liveMode?'Switch to Simulation for demo signals and practice orders.':setup?'Sample-data crossover signal. Review the levels before placing a practice order.':'Waiting for a simulated signal. You can still practice manually at the demo price.';
+ $('#setupEntry').textContent=position?fmt(position.entry):setup?fmt(setup.entry):liveMode?'Unavailable':'—';
+ $('#setupStop').textContent=position?fmt(position.stop):setup?fmt(setup.stop):liveMode?'Unavailable':'—';
+ $('#setupTake').textContent=position?fmt(position.take):setup?fmt(setup.take):liveMode?'Unavailable':'—';
+ $('#practiceBuy').disabled=liveMode||!!position;
+ $('#practiceSell').disabled=liveMode||!!position;
+ $('#closePractice').disabled=!position;
+ $('#resetPractice').disabled=!!position;
+ $('#demoLog').innerHTML=demoAccount.trades.slice(0,12).map(t=>`<tr><td>${escapeHtml(t.pair)}</td><td class="${t.dir>0?'up':'dn'}">${t.dir>0?'BUY':'SELL'}</td><td>${fmt(t.exit)}</td><td class="${t.pnl>=0?'up':'dn'}">${t.pnl>=0?'+':'-'}$${Math.abs(t.pnl).toFixed(2)}</td></tr>`).join('')||'<tr><td colspan="4" class="mute">No practice trades yet.</td></tr>';
+ $('#favoriteToggle').disabled=liveMode;
  renderFavorites();
+}
+function escapeHtml(value){
+ return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+}
+async function apiRequest(path,options={}){
+ const response=await fetch(path,{...options,credentials:'same-origin',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
+ let result={};
+ try{result=await response.json()}catch(error){if(response.ok)throw new Error('The server returned an unreadable response.')}
+ if(!response.ok){const failure=new Error(result.error||`Request failed (${response.status}).`);failure.status=response.status;throw failure}
+ return result;
+}
+function showAuth(mode='login',message=''){
+ authMode=mode;
+ $('#authShade').classList.remove('hidden');
+ $('#authError').textContent=message;
+ $('#authTitle').textContent=mode==='signup'?'Create your invited account':'Welcome to Rolyce Pilot';
+ $('#authIntro').textContent=mode==='signup'?'Create an account with the one-time code you received. Passwords must be at least 12 characters.':'Log in with the account details you received.';
+ $('#inviteLabel').classList.toggle('hidden',mode!=='signup');
+ $('#inviteCode').required=mode==='signup';
+ $('#authPassword').autocomplete=mode==='signup'?'new-password':'current-password';
+ $('#authSubmit').textContent=mode==='signup'?'Create account':'Log in';
+ $('#authToggle').textContent=mode==='signup'?'Back to log in':'I have an invite code';
+}
+function validRemoteAccount(account){
+ return account&&typeof account==='object'&&Number.isFinite(account.balance)&&account.balance>=0
+  &&Array.isArray(account.trades)&&account.trades.length<=50&&account.trades.every(trade=>trade&&typeof trade==='object'
+   &&/^[A-Z]{3}\/[A-Z]{3}$/.test(trade.pair)&&[-1,1].includes(trade.dir)
+   &&['entry','exit','pnl','closedAt'].every(key=>Number.isFinite(trade[key])))
+  &&(account.position===null||(account.position&&typeof account.position==='object'
+   &&/^[A-Z]{3}\/[A-Z]{3}$/.test(account.position.pair)&&[-1,1].includes(account.position.dir)
+   &&['entry','stop','take','units','lastPrice'].every(key=>Number.isFinite(account.position[key]))
+   &&account.position.units>0
+   &&(account.position.seconds===undefined||[300,900,3600,14400,86400].includes(account.position.seconds))
+   &&(account.position.quoteToUsd===undefined||(Number.isFinite(account.position.quoteToUsd)&&account.position.quoteToUsd>0))
+   &&(account.position.openedAt===undefined||Number.isFinite(account.position.openedAt))));
+}
+async function finishAuthentication(user){
+ const result=await apiRequest('/api/demo');
+ if(result.account!==null&&!validRemoteAccount(result.account))throw new Error('The saved demo account has invalid data. Please contact support.');
+ currentUser=user;
+ demoAccount=result.account||{balance:10000,position:null,trades:[]};
+ document.body.classList.remove('auth-locked');
+ $('#authShade').classList.add('hidden');
+ $('#authForm').reset();
+ $('#inviteCode').required=false;
+ build();
+ if(!result.account)saveDemoAccount();
+}
+async function initializeAuth(){
+ if(!serverHosted){$('#accountButton').textContent='Local preview';return}
+ try{
+  await apiRequest('/api/health');
+  const result=await apiRequest('/api/auth/me');
+  await finishAuthentication(result.user);
+ }catch(error){
+  if(error.status===401)showAuth('login');
+  else showAuth('login','Account server is unavailable. Your account and demo trades are not stored on this device; please try again when the server is reachable.');
+ }
 }
 const savedFrame=localStorage.getItem('fxpilot.timeframe');
 if(savedFrame&&FRAMES[savedFrame])$('#timeframe').value=savedFrame;
 $('#pair').addEventListener('change',build);
 $('#timeframe').addEventListener('change',build);
+$('#mode').addEventListener('change',()=>{localStorage.setItem('roylcePilot.mode',$('#mode').value);build()});
 $('#rerun').onclick=build;
 $('#favoriteToggle').onclick=toggleFavorite;
+$('#practiceBuy').onclick=()=>openDemoTrade('BUY');
+$('#practiceSell').onclick=()=>openDemoTrade('SELL');
+$('#closePractice').onclick=()=>{const position=demoAccount.position;if(position)closeDemoTrade(position.lastPrice)};
+$('#resetPractice').onclick=clearDemoAccount;
+$('#directionFilter').addEventListener('change',build);
+$('#autoSl').addEventListener('change',build);
+$('#autoTp').addEventListener('change',build);
 $('#riskProfile').addEventListener('change',e=>{
- const profiles={cautious:{risk:.5,sl:.5,tp:1,dd:2,label:'Cautious'},balanced:{risk:1,sl:.4,tp:.8,dd:3,label:'Balanced'},higher:{risk:1.5,sl:.5,tp:1,dd:4,label:'Higher risk'}};
+ const profiles={cautious:{risk:.25,sl:1.5,tp:3,dd:2,label:'Cautious'},balanced:{risk:.5,sl:1.5,tp:3,dd:3,label:'Balanced'},higher:{risk:1,sl:2,tp:4,dd:4,label:'Higher risk'}};
  const profile=profiles[e.target.value];if(!profile)return;
  for(const key of ['risk','sl','tp','dd'])$('#'+key).value=profile[key];
- $('#riskSummary').textContent=`${profile.label}: up to ${profile.risk}% risk per simulated trade, ${profile.dd}% daily loss limit.`;
+ $('#riskSummary').textContent=`${profile.label}: planned loss at the stop is about ${profile.risk}% of demo balance. Daily limit: ${profile.dd}%.`;
  build();
 });
 for(const id of ['risk','sl','tp','dd'])$('#'+id).addEventListener('input',()=>{
  $('#riskProfile').value='custom';$('#riskSummary').textContent='Custom risk values apply to the paper simulation.';
 });
-$('#run').onclick=e=>{const off=e.target.dataset.off!=='1';e.target.dataset.off=off?'1':'0';e.target.textContent=off?'Resume simulation':'Pause simulation';clearInterval(timer);if(!off)timer=setInterval(tick,1200)};
+$('#plot').addEventListener('pointerdown',event=>{
+ if($('#chartTool').value==='cursor')return;
+ const box=event.currentTarget.getBoundingClientRect();
+ addChartPointer({x:event.clientX-box.left,y:event.clientY-box.top});
+});
+$('#chartTool').addEventListener('change',()=>{
+ drawingStart=null;
+ $('#drawHint').textContent=$('#chartTool').value==='cursor'?'Choose a tool to draw on the chart.':$('#chartTool').value==='trend'?'Tap or click twice to draw a trend line.':'Tap or click the chart to add '+$('#chartTool').selectedOptions[0].text.toLowerCase()+'.';
+});
+$('#clearDrawings').addEventListener('click',()=>{drawings=[];drawingStart=null;saveDrawings();drawChart();$('#drawHint').textContent='Chart drawings cleared.'});
+$('#run').onclick=e=>{const off=e.target.dataset.off!=='1';e.target.dataset.off=off?'1':'0';e.target.textContent=off?'Resume simulation':'Pause simulation';clearInterval(timer);if(!off&&$('#mode').value==='simulation')timer=setInterval(tick,5000)};
 window.addEventListener('resize',drawChart);
+$('#authToggle').addEventListener('click',()=>showAuth(authMode==='login'?'signup':'login'));
+$('#authContact').addEventListener('click',()=>$('#contactDialog').showModal());
+$('#authForm').addEventListener('submit',async event=>{
+ event.preventDefault();
+ const submit=$('#authSubmit');submit.disabled=true;$('#authError').textContent='';
+ try{
+  const payload={username:$('#authUsername').value.trim(),password:$('#authPassword').value};
+  if(authMode==='signup')payload.code=$('#inviteCode').value.trim();
+  const result=await apiRequest(authMode==='signup'?'/api/auth/signup':'/api/auth/login',{method:'POST',body:JSON.stringify(payload)});
+  await finishAuthentication(result.user);
+ }catch(error){showAuth(authMode,error.message)}
+ finally{submit.disabled=false}
+});
+$('#accountButton').addEventListener('click',()=>{
+ if(currentUser){$('#accountName').textContent=`Signed in as ${currentUser.username}`;$('#accountDialog').showModal()}
+ else if(serverHosted)showAuth('login');
+ else{$('#accountName').textContent='This local preview stores demo trades only in this browser. Start the Node server to use invited accounts.';$('#logoutButton').classList.add('hidden');$('#accountDialog').showModal()}
+});
+$('#logoutButton').addEventListener('click',async()=>{
+ const button=$('#logoutButton');button.disabled=true;
+ try{
+  await apiRequest('/api/auth/logout',{method:'POST'});
+  currentUser=null;demoAccount={balance:10000,position:null,trades:[]};
+  clearInterval(timer);timer=null;document.body.classList.add('auth-locked');
+  $('#accountDialog').close();showAuth('login');build();
+ }catch(error){console.error('Could not log out.',error);$('#accountName').textContent='Could not log out: '+error.message}
+ finally{button.disabled=false}
+});
+$('#contactButton').addEventListener('click',()=>$('#contactDialog').showModal());
+$('#closeContact').addEventListener('click',()=>$('#contactDialog').close());
+$('#closeAccount').addEventListener('click',()=>$('#accountDialog').close());
 build();
+initializeAuth();
 </script></body></html>
