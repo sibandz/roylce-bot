@@ -145,7 +145,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
   <form id="authForm">
    <label>Username<input id="authUsername" autocomplete="username" minlength="3" maxlength="32" required></label>
    <label id="inviteLabel" class="hidden">One-time signup code<input id="inviteCode" autocomplete="off"></label>
-   <label>Password<input id="authPassword" type="password" autocomplete="current-password" minlength="12" required></label>
+   <label>Password<input id="authPassword" type="password" autocomplete="current-password" required></label>
    <p id="authError" class="auth-error" aria-live="polite"></p>
    <button id="authSubmit" class="go full" type="submit">Log in</button>
   </form>
@@ -594,6 +594,7 @@ function showAuth(mode='login',message=''){
  $('#inviteLabel').classList.toggle('hidden',mode!=='signup');
  $('#inviteCode').required=mode==='signup';
  $('#authPassword').autocomplete=mode==='signup'?'new-password':'current-password';
+ $('#authPassword').minLength=mode==='signup'?12:0;
  $('#authSubmit').textContent=mode==='signup'?'Create account':'Log in';
  $('#authToggle').textContent=mode==='signup'?'Back to log in':'I have an invite code';
 }

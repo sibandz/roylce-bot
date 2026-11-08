@@ -14,8 +14,6 @@
     "admin:local": "node server.mjs create-admin"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "firebase": "^12.19.0",
-    "firebase-admin": "^14.5.0"
+    "express": "^5.1.0"
   }
 }
