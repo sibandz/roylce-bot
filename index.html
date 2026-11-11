@@ -4,7 +4,7 @@
 <title>Rolyce Pilot · FX practice</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7f8;--panel:#fff;--ink:#18212b;--mute:#75808d;--line:#e7eaee;--buy:#138363;--sell:#c95858;--acc:#4665dc;--nav:#16202b}
+:root{--bg:#101522;--panel:rgba(255,255,255,.075);--ink:#edf2fc;--mute:#a5b1c5;--line:rgba(255,255,255,.14);--buy:#39cda0;--sell:#ff7f8c;--acc:#9aabff;--nav:rgba(13,20,35,.68)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 'Instrument Sans',system-ui,sans-serif}
 header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 20px;background:var(--nav);color:#fff;border-bottom:1px solid #263344}
@@ -96,7 +96,7 @@ dialog{border:0;border-radius:12px;padding:0;max-width:min(440px,calc(100vw - 24
 dialog::backdrop{background:#111a27a8}
 .dialog-head{display:flex;justify-content:space-between;align-items:center}
 .dialog-head button{border:0;font-size:20px}
-body.auth-locked main{filter:blur(2px);pointer-events:none;user-select:none}
+body.auth-locked main{filter:none;pointer-events:none;user-select:none}
 button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:14px}#charts{grid-template-columns:1fr}.side{grid-template-columns:1fr}.side-column{gap:9px}}
 @media(max-width:580px){
@@ -122,6 +122,51 @@ button:disabled{opacity:.55;cursor:not-allowed}
  .chart-tools button{min-height:40px}
  .auth-card,.dialog-card{padding:18px}
 }
+body{min-height:100vh;background:radial-gradient(ellipse at 12% 0%,rgba(99,123,220,.24),transparent 38%),radial-gradient(ellipse at 88% 18%,rgba(133,89,190,.2),transparent 34%),linear-gradient(145deg,#101522,#171c2d 56%,#111827);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(52,127,157,.12),transparent 44%)}
+header{position:sticky;top:0;z-index:5;background:var(--nav);border-bottom-color:rgba(255,255,255,.12);backdrop-filter:saturate(155%) blur(24px);-webkit-backdrop-filter:saturate(155%) blur(24px);box-shadow:0 10px 32px rgba(0,0,0,.16)}
+header h1{font-size:18px;letter-spacing:-.045em;background:linear-gradient(110deg,#fff 15%,#b9c9ff 72%,#d7baff);-webkit-background-clip:text;background-clip:text;color:transparent}
+header>label{color:#c3cee2!important}
+header input,header select,header button{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.16);color:#f3f5ff}
+header select option{background:#20283a;color:#edf2fc}
+header button:hover{background:rgba(255,255,255,.15);filter:none}
+header button.go,#authSubmit{background:linear-gradient(135deg,#7f91ff,#9a79df);border:1px solid rgba(255,255,255,.24);color:white;box-shadow:0 6px 20px rgba(112,111,231,.25)}
+header h1::before{content:"";display:inline-block;width:8px;height:8px;margin:0 9px 2px 0;border-radius:50%;background:#a5b8ff;box-shadow:0 0 16px #91a5ff}
+main{padding-top:22px;padding-bottom:32px}
+section{background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045));border-color:rgba(255,255,255,.12);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.19),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+section h2{color:#f3f5ff}
+input,button,select{border-color:rgba(255,255,255,.16);border-radius:10px;background:rgba(255,255,255,.075);color:var(--ink)}
+input::placeholder{color:#8794aa}
+select option{background:#20283a;color:#edf2fc}
+button{transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease}
+button:hover{filter:none;transform:translateY(-1px);border-color:rgba(255,255,255,.3);box-shadow:0 7px 18px rgba(0,0,0,.16)}
+button.go{background:linear-gradient(135deg,#7f91ff,#9a79df);border-color:rgba(255,255,255,.2);box-shadow:0 7px 22px rgba(112,111,231,.24)}
+:focus-visible{outline-color:#aab8ff}
+.stats div,.signal-box,.watch-item,.watch-alert,.practice-ticket,.ticket-grid div,.news-card{background:rgba(255,255,255,.065);border:1px solid rgba(255,255,255,.085);border-radius:11px}
+.stats b,.signal-box b,.ticket-grid b,.watch-alert b{color:#f2f5ff}
+.chart-legend .legend-item{color:#b1bdd0}
+th,td{border-color:rgba(255,255,255,.1)}
+th{color:#aab6ca}
+.news li{border-color:rgba(255,255,255,.1)}
+.news-link,.news-card,.news-more summary{color:#b6c2ff}
+.demo{color:#ffdc91;background:rgba(179,135,49,.18);border:1px solid rgba(255,211,113,.18)}
+.live{color:#b7ddff;background:rgba(83,145,204,.18);border:1px solid rgba(137,197,255,.16)}
+.buy-button{background:linear-gradient(135deg,#168d72,#27b78d);border-color:transparent;color:white}
+.sell-button{background:linear-gradient(135deg,#bd536b,#e36c7a);border-color:transparent;color:white}
+.risk-note{background:rgba(212,164,76,.13);color:#f2d89e;border:1px solid rgba(255,218,141,.13)}
+details{border-color:rgba(255,255,255,.12)}
+.subtle{color:#a5b1c5}
+.auth-shade{background:rgba(8,12,24,.28);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
+.auth-card,.dialog-card{color:var(--ink);background:linear-gradient(145deg,rgba(38,47,70,.92),rgba(27,34,53,.9));border:1px solid rgba(255,255,255,.18);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.11);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px)}
+.auth-card h2,.dialog-card h2{color:#f6f6ff}
+.auth-card label{color:#bec8da}
+.auth-card input{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);border-radius:11px;color:#f4f6ff}
+.auth-actions button{background:rgba(255,255,255,.075);color:#e1e7f6}
+.dialog-card p{color:#bdc7da}
+.dialog-head button{color:#e7eafa}
+dialog{background:transparent}
+dialog::backdrop{background:rgba(8,12,24,.56);backdrop-filter:blur(8px)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 </style></head><body>
 <header>
  <h1>Rolyce Pilot</h1>
@@ -150,7 +195,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
    <button id="authSubmit" class="go full" type="submit">Log in</button>
   </form>
   <div class="auth-actions"><button id="authToggle" type="button">I have an invite code</button><button id="authContact" type="button">Contact us</button></div>
-  <p id="authFootnote" class="subtle">Invite-only accounts. Contact us if you need access.</p>
+  <p id="authFootnote" class="subtle">Invite-only accounts. The FX dashboard behind this window is a simulated practice preview.</p>
  </div>
 </div>
 <dialog id="contactDialog"><div class="dialog-card"><div class="dialog-head"><h2>Contact Rolyce Pilot</h2><button id="closeContact" aria-label="Close dialog" type="button">×</button></div><p>For access, pricing, or questions, email:</p><p><a href="mailto:skndzamela@gmail.com">skndzamela@gmail.com</a></p><a class="button-link" href="mailto:skndzamela@gmail.com?subject=Rolyce%20Pilot%20enquiry">Send email</a></div></dialog>
