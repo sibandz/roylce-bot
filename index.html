@@ -81,22 +81,14 @@ summary{cursor:pointer;font-size:12px;font-weight:600}
 .chart-hint{margin:4px 0 8px}
 .auto-setting{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;font-size:12px}
 .auto-setting input{width:17px;height:17px}
-.auth-shade{position:fixed;inset:0;z-index:20;background:#111a27b8;display:grid;place-items:center;padding:16px}
-.auth-card,.dialog-card{width:min(440px,100%);background:#fff;border-radius:12px;padding:22px;box-shadow:0 18px 70px #0003}
-.auth-card h2,.dialog-card h2{font-size:20px;margin:0 0 6px}
-.auth-card label{display:block;font-size:12px;color:var(--mute)}
-.auth-card input{display:block;width:100%;margin-top:4px;padding:10px}
-.auth-card button{min-height:42px}
-.auth-actions{display:flex;gap:8px;margin-top:12px}
-.auth-actions button{flex:1}
-.auth-error{min-height:20px;color:var(--sell);font-size:12px;margin:7px 0}
+.dialog-card{width:min(440px,100%);background:#fff;border-radius:12px;padding:22px;box-shadow:0 18px 70px #0003}
+.dialog-card h2{font-size:20px;margin:0 0 6px}
 .dialog-card p{color:var(--mute)}
 .button-link{display:inline-block;padding:8px 12px;background:var(--acc);color:white;text-decoration:none;border-radius:6px;font-weight:600}
 dialog{border:0;border-radius:12px;padding:0;max-width:min(440px,calc(100vw - 24px));width:100%}
 dialog::backdrop{background:#111a27a8}
 .dialog-head{display:flex;justify-content:space-between;align-items:center}
 .dialog-head button{border:0;font-size:20px}
-body.auth-locked main{filter:none;pointer-events:none;user-select:none}
 button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:900px){main{grid-template-columns:1fr;padding:14px}#charts{grid-template-columns:1fr}.side{grid-template-columns:1fr}.side-column{gap:9px}}
 @media(max-width:580px){
@@ -107,7 +99,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
  header>button{flex:1 1 calc(50% - 8px);min-height:42px}
  header>.badge{font-size:10px}
  header>.mute{width:100%}
- header>#accountButton,header>#contactButton{flex:1 1 calc(50% - 8px);min-height:40px}
+ header>#contactButton{flex:1 1 calc(50% - 8px);min-height:40px}
  main{padding:9px;gap:9px}
  section{padding:12px;border-radius:8px}
  .side{display:grid;grid-template-columns:1fr;gap:9px}
@@ -120,7 +112,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
  .trade-actions button{min-height:44px}
  .chart-tools select{flex:1;min-width:130px}
  .chart-tools button{min-height:40px}
- .auth-card,.dialog-card{padding:18px}
+ .dialog-card{padding:18px}
 }
 body{min-height:100vh;background:radial-gradient(ellipse at 12% 0%,rgba(99,123,220,.24),transparent 38%),radial-gradient(ellipse at 88% 18%,rgba(133,89,190,.2),transparent 34%),linear-gradient(145deg,#101522,#171c2d 56%,#111827);background-attachment:fixed}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(52,127,157,.12),transparent 44%)}
@@ -130,7 +122,7 @@ header>label{color:#c3cee2!important}
 header input,header select,header button{background:rgba(255,255,255,.085);border-color:rgba(255,255,255,.16);color:#f3f5ff}
 header select option{background:#20283a;color:#edf2fc}
 header button:hover{background:rgba(255,255,255,.15);filter:none}
-header button.go,#authSubmit{background:linear-gradient(135deg,#7f91ff,#9a79df);border:1px solid rgba(255,255,255,.24);color:white;box-shadow:0 6px 20px rgba(112,111,231,.25)}
+header button.go{background:linear-gradient(135deg,#7f91ff,#9a79df);border:1px solid rgba(255,255,255,.24);color:white;box-shadow:0 6px 20px rgba(112,111,231,.25)}
 header h1::before{content:"";display:inline-block;width:8px;height:8px;margin:0 9px 2px 0;border-radius:50%;background:#a5b8ff;box-shadow:0 0 16px #91a5ff}
 main{padding-top:22px;padding-bottom:32px}
 section{background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045));border-color:rgba(255,255,255,.12);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.19),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
@@ -156,12 +148,8 @@ th{color:#aab6ca}
 .risk-note{background:rgba(212,164,76,.13);color:#f2d89e;border:1px solid rgba(255,218,141,.13)}
 details{border-color:rgba(255,255,255,.12)}
 .subtle{color:#a5b1c5}
-.auth-shade{background:rgba(8,12,24,.28);backdrop-filter:blur(1px);-webkit-backdrop-filter:blur(1px)}
-.auth-card,.dialog-card{color:var(--ink);background:linear-gradient(145deg,rgba(38,47,70,.92),rgba(27,34,53,.9));border:1px solid rgba(255,255,255,.18);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.11);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px)}
-.auth-card h2,.dialog-card h2{color:#f6f6ff}
-.auth-card label{color:#bec8da}
-.auth-card input{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16);border-radius:11px;color:#f4f6ff}
-.auth-actions button{background:rgba(255,255,255,.075);color:#e1e7f6}
+.dialog-card{color:var(--ink);background:linear-gradient(145deg,rgba(38,47,70,.92),rgba(27,34,53,.9));border:1px solid rgba(255,255,255,.18);border-radius:22px;box-shadow:0 28px 90px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.11);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px)}
+.dialog-card h2{color:#f6f6ff}
 .dialog-card p{color:#bdc7da}
 .dialog-head button{color:#e7eafa}
 dialog{background:transparent}
@@ -182,24 +170,9 @@ dialog::backdrop{background:rgba(8,12,24,.56);backdrop-filter:blur(8px)}
  <button id="run">Pause simulation</button>
  <span class="badge demo" id="modeBadge">SIMULATION · PRACTICE ACCOUNT</span>
  <span class="mute" style="color:#c2ccd8">Live charts are view-only · no broker connected</span>
- <button id="accountButton" type="button">Log in</button>
  <button id="contactButton" type="button">Contact us</button>
 </header>
-<div id="authShade" class="auth-shade hidden" role="dialog" aria-modal="true" aria-labelledby="authTitle">
- <div class="auth-card"><h2 id="authTitle">Welcome to Rolyce Pilot</h2><p id="authIntro" class="subtle">Log in with the account details you received.</p>
-  <form id="authForm">
-   <label>Username<input id="authUsername" autocomplete="username" minlength="3" maxlength="32" required></label>
-   <label id="inviteLabel" class="hidden">One-time signup code<input id="inviteCode" autocomplete="off"></label>
-   <label>Password<input id="authPassword" type="password" autocomplete="current-password" required></label>
-   <p id="authError" class="auth-error" aria-live="polite"></p>
-   <button id="authSubmit" class="go full" type="submit">Log in</button>
-  </form>
-  <div class="auth-actions"><button id="authToggle" type="button">I have an invite code</button><button id="authContact" type="button">Contact us</button></div>
-  <p id="authFootnote" class="subtle">Invite-only accounts. The FX dashboard behind this window is a simulated practice preview.</p>
- </div>
-</div>
 <dialog id="contactDialog"><div class="dialog-card"><div class="dialog-head"><h2>Contact Rolyce Pilot</h2><button id="closeContact" aria-label="Close dialog" type="button">×</button></div><p>For access, pricing, or questions, email:</p><p><a href="mailto:skndzamela@gmail.com">skndzamela@gmail.com</a></p><a class="button-link" href="mailto:skndzamela@gmail.com?subject=Rolyce%20Pilot%20enquiry">Send email</a></div></dialog>
-<dialog id="accountDialog"><div class="dialog-card"><div class="dialog-head"><h2>Your account</h2><button id="closeAccount" aria-label="Close account dialog" type="button">×</button></div><p id="accountName"></p><button id="logoutButton" type="button">Log out</button></div></dialog>
 <main id="appMain">
  <div id="charts">
  <section id="livePanel"><div class="chart-head"><h2 id="liveTitle">TradingView live market chart · EUR/USD</h2><span class="mute" id="liveFrameLabel">TradingView · 1-hour candles</span></div><div id="tvChart"></div>
@@ -220,7 +193,7 @@ dialog::backdrop{background:rgba(8,12,24,.56);backdrop-filter:blur(8px)}
   </section>
   </div>
   <section id="demoPanel"><h2>Demo practice account</h2>
-   <p class="subtle">Virtual $10,000 starting balance · no real money involved</p>
+   <p class="subtle">Virtual $10,000 starting balance · saved in this browser · no real money involved</p>
    <label class="trade-direction">Trade direction<select id="directionFilter" aria-label="Trade direction"><option value="any">Show long and short</option><option value="long">Long setups only</option><option value="short">Short setups only</option></select></label>
    <div class="stats" id="demoStats"></div>
    <div class="practice-ticket"><b id="setupTitle">Bot trade setup</b><p id="setupSummary" class="subtle">Waiting for a simulated signal.</p>
@@ -271,12 +244,9 @@ $('#pair').innerHTML=PAIRS.map(p=>`<option value="${p}">${p.replace('/',' / ')}<
 const storedPair=localStorage.getItem('fxpilot.pair');
 $('#pair').value=PAIRS.includes(storedPair)?storedPair:'EUR/USD';
 $('#mode').value=localStorage.getItem('roylcePilot.mode')||'simulation';
-const serverHosted=location.protocol!=='file:';
-let currentUser=null,authMode='login',demoSaveTimer;
-if(serverHosted){document.body.classList.add('auth-locked');$('#authShade').classList.remove('hidden')}
 let favorites=JSON.parse(localStorage.getItem('fxpilot.favorites')||'[]').filter(p=>PAIRS.includes(p));
 let favoriteFeeds={},favoriteAlerts=[];
-let demoAccount=(()=>{if(serverHosted)return{balance:10000,position:null,trades:[]};try{const saved=JSON.parse(localStorage.getItem('roylcePilot.demo')||'null');return saved&&Number.isFinite(saved.balance)&&Array.isArray(saved.trades)?saved:{balance:10000,position:null,trades:[]}}catch(error){console.warn('Could not load the saved demo account; starting a new one.',error);return{balance:10000,position:null,trades:[]}}})();
+let demoAccount=(()=>{try{const saved=JSON.parse(localStorage.getItem('roylcePilot.demo')||'null');return saved&&Number.isFinite(saved.balance)&&Array.isArray(saved.trades)?saved:{balance:10000,position:null,trades:[]}}catch(error){console.warn('Could not load the saved demo account; starting a new one.',error);return{balance:10000,position:null,trades:[]}}})();
 
 /* ---------- ADAPTER 1: market data ----------
    Demo: seeded random walk, one new hourly candle per tick.
@@ -354,18 +324,10 @@ function makePracticeFeed(practicePosition){
 }
 function saveDemoAccount(){
  const account=JSON.parse(JSON.stringify(demoAccount,(key,value)=>key==='marketFeed'?undefined:value));
- if(!serverHosted){
-  try{localStorage.setItem('roylcePilot.demo',JSON.stringify(account))}
-  catch(error){console.error('Could not save the demo account to this browser.',error);$('#practiceNotice').textContent='Browser storage failed; this demo account may not persist after closing the page.'}
- }else if(currentUser){
-  clearTimeout(demoSaveTimer);
-  demoSaveTimer=setTimeout(()=>apiRequest('/api/demo',{method:'PUT',body:JSON.stringify({account})}).catch(error=>{
-   console.error('Could not sync the demo account to the server.',error);$('#practiceNotice').textContent='Could not sync your demo account. Check your connection before closing this page.';
-  }),250);
- }
+ try{localStorage.setItem('roylcePilot.demo',JSON.stringify(account))}
+ catch(error){console.error('Could not save the demo account to this browser.',error);$('#practiceNotice').textContent='Browser storage failed; this demo account may not persist after closing the page.'}
 }
 function openDemoTrade(side){
- if(serverHosted&&!currentUser){showAuth('login');return}
  if($('#mode').value!=='simulation'){alert('Switch to Simulation mode to place a demo practice trade.');return}
  if(demoAccount.position){$('#practiceNotice').textContent='Close your open demo position before placing another.';return}
  if(demoAccount.balance<=0){$('#practiceNotice').textContent='Your demo balance is empty. Reset the account to practice again.';return}
@@ -513,7 +475,6 @@ function build(){
  $('#news').innerHTML=n.items.map(i=>`<li><span>${i.title}<br><span class="mute">${i.ccy}</span><br><a class="news-link" href="${newsSearchUrl(i.title+' '+i.ccy+' currency')}" target="_blank" rel="noopener noreferrer">Find related articles ↗</a></span><b class="${i.score>=0?'up':'dn'}">${i.score>0?'+':''}${i.score}</b></li>`).join('');
  renderNewsLinks();
  syncFavoriteFeeds();render();
- if(serverHosted&&!currentUser)return;
  if(liveMode&&demoAccount.position)timer=setInterval(tick,5000);
  else if(!liveMode&&$('#run').dataset.off!=='1')timer=setInterval(tick,5000);
 }
@@ -586,7 +547,6 @@ function renderFavorites(){
 function render(){
  const liveMode=$('#mode').value==='live';
  const frame=FRAMES[$('#timeframe').value];
- $('#accountButton').textContent=currentUser?(currentUser.role==='admin'?'Admin · '+currentUser.username:currentUser.username):serverHosted?'Log in':'Local preview';
  $('#run').disabled=liveMode;
  $('#run').textContent=liveMode?(demoAccount.position?'Demo trade protection running':'Simulation paused in live view'):$('#run').dataset.off==='1'?'Resume simulation':'Pause simulation';
  $('#stats').innerHTML=(liveMode?[['Chart data','TradingView'],['Live signals','Unavailable'],['Trading','Disabled']]:[['Feed','Synthetic demo'],['Pair',pair],['Timeframe',frame.label],['Demo price',fmt(S.last)],['Bot signal',S.sig],['Status','Paper mode']])
@@ -614,70 +574,6 @@ function render(){
 }
 function escapeHtml(value){
  return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-}
-async function apiRequest(path,options={}){
- let response;
- try{
-  response=await fetch(path,{...options,credentials:'same-origin',headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});
- }catch(error){
-  if(error.name==='AbortError')throw error;
-  throw new Error(serverHosted
-   ?'Cannot reach the deployed account API. Confirm the Vercel deployment includes the api/ functions.'
-   :'Cannot reach the account server. In PowerShell run npm.cmd start and keep that window open, then open the site at http://localhost:3000.');
- }
- let result={};
- try{result=await response.json()}catch(error){if(response.ok)throw new Error('The server returned an unreadable response.')}
- if(!response.ok){const failure=new Error(result.error||`Request failed (${response.status}).`);failure.status=response.status;throw failure}
- return result;
-}
-function showAuth(mode='login',message=''){
- authMode=mode;
- $('#authShade').classList.remove('hidden');
- $('#authError').textContent=message;
- $('#authTitle').textContent=mode==='signup'?'Create your invited account':'Welcome to Rolyce Pilot';
- $('#authIntro').textContent=mode==='signup'?'Create an account with the one-time code you received. Passwords must be at least 12 characters.':'Log in with the account details you received.';
- $('#inviteLabel').classList.toggle('hidden',mode!=='signup');
- $('#inviteCode').required=mode==='signup';
- $('#authPassword').autocomplete=mode==='signup'?'new-password':'current-password';
- $('#authPassword').minLength=mode==='signup'?12:0;
- $('#authSubmit').textContent=mode==='signup'?'Create account':'Log in';
- $('#authToggle').textContent=mode==='signup'?'Back to log in':'I have an invite code';
-}
-function validRemoteAccount(account){
- return account&&typeof account==='object'&&Number.isFinite(account.balance)&&account.balance>=0
-  &&Array.isArray(account.trades)&&account.trades.length<=50&&account.trades.every(trade=>trade&&typeof trade==='object'
-   &&/^[A-Z]{3}\/[A-Z]{3}$/.test(trade.pair)&&[-1,1].includes(trade.dir)
-   &&['entry','exit','pnl','closedAt'].every(key=>Number.isFinite(trade[key])))
-  &&(account.position===null||(account.position&&typeof account.position==='object'
-   &&/^[A-Z]{3}\/[A-Z]{3}$/.test(account.position.pair)&&[-1,1].includes(account.position.dir)
-   &&['entry','stop','take','units','lastPrice'].every(key=>Number.isFinite(account.position[key]))
-   &&account.position.units>0
-   &&(account.position.seconds===undefined||[300,900,3600,14400,86400].includes(account.position.seconds))
-   &&(account.position.quoteToUsd===undefined||(Number.isFinite(account.position.quoteToUsd)&&account.position.quoteToUsd>0))
-   &&(account.position.openedAt===undefined||Number.isFinite(account.position.openedAt))));
-}
-async function finishAuthentication(user){
- const result=await apiRequest('/api/demo');
- if(result.account!==null&&!validRemoteAccount(result.account))throw new Error('The saved demo account has invalid data. Please contact support.');
- currentUser=user;
- demoAccount=result.account||{balance:10000,position:null,trades:[]};
- document.body.classList.remove('auth-locked');
- $('#authShade').classList.add('hidden');
- $('#authForm').reset();
- $('#inviteCode').required=false;
- build();
- if(!result.account)saveDemoAccount();
-}
-async function initializeAuth(){
- if(!serverHosted){$('#accountButton').textContent='Local preview';return}
- try{
-  await apiRequest('/api/health');
-  const result=await apiRequest('/api/auth/me');
-  await finishAuthentication(result.user);
- }catch(error){
-  if(error.status===401)showAuth('login');
-  else showAuth('login',error.status?error.message:'Account server is unavailable. Your account and demo trades are not stored on this device; please try again when the server is reachable.');
- }
 }
 const savedFrame=localStorage.getItem('fxpilot.timeframe');
 if(savedFrame&&FRAMES[savedFrame])$('#timeframe').value=savedFrame;
@@ -715,39 +611,9 @@ $('#chartTool').addEventListener('change',()=>{
 $('#clearDrawings').addEventListener('click',()=>{drawings=[];drawingStart=null;saveDrawings();drawChart();$('#drawHint').textContent='Chart drawings cleared.'});
 $('#run').onclick=e=>{const off=e.target.dataset.off!=='1';e.target.dataset.off=off?'1':'0';e.target.textContent=off?'Resume simulation':'Pause simulation';clearInterval(timer);if(!off&&$('#mode').value==='simulation')timer=setInterval(tick,5000)};
 window.addEventListener('resize',drawChart);
-$('#authToggle').addEventListener('click',()=>showAuth(authMode==='login'?'signup':'login'));
-$('#authContact').addEventListener('click',()=>$('#contactDialog').showModal());
-$('#authForm').addEventListener('submit',async event=>{
- event.preventDefault();
- const submit=$('#authSubmit');submit.disabled=true;$('#authError').textContent='';
- try{
-  const payload={username:$('#authUsername').value.trim(),password:$('#authPassword').value};
-  if(authMode==='signup')payload.code=$('#inviteCode').value.trim();
-  const result=await apiRequest(authMode==='signup'?'/api/auth/signup':'/api/auth/login',{method:'POST',body:JSON.stringify(payload)});
-  await finishAuthentication(result.user);
- }catch(error){showAuth(authMode,error.message)}
- finally{submit.disabled=false}
-});
-$('#accountButton').addEventListener('click',()=>{
- if(currentUser){$('#accountName').textContent=`Signed in as ${currentUser.username} · ${currentUser.role==='admin'?'Administrator':'User'}`;$('#logoutButton').classList.remove('hidden');$('#accountDialog').showModal()}
- else if(serverHosted)showAuth('login');
- else{$('#accountName').textContent='This local preview stores demo trades only in this browser. Start the Node server to use invited accounts.';$('#logoutButton').classList.add('hidden');$('#accountDialog').showModal()}
-});
-$('#logoutButton').addEventListener('click',async()=>{
- const button=$('#logoutButton');button.disabled=true;
- try{
-  await apiRequest('/api/auth/logout',{method:'POST'});
-  currentUser=null;demoAccount={balance:10000,position:null,trades:[]};
-  clearInterval(timer);timer=null;document.body.classList.add('auth-locked');
-  $('#accountDialog').close();showAuth('login');build();
- }catch(error){console.error('Could not log out.',error);$('#accountName').textContent='Could not log out: '+error.message}
- finally{button.disabled=false}
-});
 $('#contactButton').addEventListener('click',()=>$('#contactDialog').showModal());
 $('#closeContact').addEventListener('click',()=>$('#contactDialog').close());
-$('#closeAccount').addEventListener('click',()=>$('#accountDialog').close());
 build();
-initializeAuth();
 </script>
 <script type="module">
   // Import the functions you need from the SDKs you need
